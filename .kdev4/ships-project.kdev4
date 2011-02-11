@@ -1,0 +1,15 @@
+[Buildset]
+BuildItems=@Variant(\x00\x00\x00\t\x00\x00\x00\x00\x01\x00\x00\x00\x0b\x00\x00\x00\x00\x01\x00\x00\x00\x1a\x00s\x00h\x00i\x00p\x00s\x00-\x00p\x00r\x00o\x00j\x00e\x00c\x00t)
+
+[CMake]
+BuildDirs=/home/fqhuy/Documents/Projects/ships-project/build
+CMakeDir=/usr/share/cmake-2.8/Modules
+Current CMake Binary=file:///usr/bin/cmake
+CurrentBuildDir=file:///home/fqhuy/Documents/Projects/ships-project/build
+CurrentBuildType=Debug
+CurrentInstallDir=
+Extra Arguments=
+ProjectRootRelative=./
+
+[Project]
+VersionControlSupport=kdevsubversion
