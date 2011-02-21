@@ -9,7 +9,7 @@
 
 /****************************************************************************************\
 *                                  Matrix type                                            *
-\****************************************************************************************/
+ \****************************************************************************************/
 
 #define SP_CN_MAX     512
 #define SP_CN_SHIFT   3
@@ -91,4 +91,11 @@
 #define SP_MAT_MAGIC_VAL    0x42420000
 #define SP_TYPE_NAME_MAT    "ships-matrix"
 
+namespace Sp {
+//static std::string ships_install_path(SHIPS_INSTALL_RPATH);
+//static std::string ships_home_path(SHIPS_HOME_RPATH);
+
+static log4cxx::LoggerPtr global_logger(log4cxx::Logger::getLogger("ships"));
+static log4cxx::LoggerPtr core_logger(log4cxx::Logger::getLogger("ships.core"));
+}
 #endif

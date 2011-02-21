@@ -47,4 +47,25 @@
 #define SPAPI(rettype) SHIPS_EXTERN_C SHIPS_EXPORTS rettype SHIPS_CDECL
 #endif
 
+namespace Sp{
+class ShipsConfig{
+public:
+	SHIPS_INLINE static ShipsConfig& Instance(){
+		static ShipsConfig config;
+		return config;
+	}
+	void Config(const std::string& file_name);
+	void Config();
+
+	SHIPS_INLINE std::string GetHome(){return ships_home_path;}
+private:
+	ShipsConfig();
+	virtual ~ShipsConfig(){}
+	ShipsConfig& operator=(const ShipsConfig& config);
+
+	std::string file_name_;
+	std::string ships_home_path;
+	libconfig::Config config_;
+};
+}
 #endif

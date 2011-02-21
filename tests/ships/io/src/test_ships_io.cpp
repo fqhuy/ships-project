@@ -5,13 +5,21 @@
  *      Author: fqhuy
  */
 
+#include <cppunit/TestFixture.h>
+#include <cppunit/TestSuite.h>
+#include <cppunit/extensions/HelperMacros.h>
 #include <cppunit/ui/text/TestRunner.h>
-#include "plugin_png_test.hpp"
+#include <ships/io/io.hpp>
 
-int main(int argc, char **argv){
-	  CppUnit::TextUi::TestRunner runner;
-	  //runner.addTest( ExampleTestCase::suite() );
-	  runner.addTest( PluginPNGTest::suite() );
-	  runner.run();
-	  return 0;
+#include "plugin_png_test.hpp"
+#include "iostream_test.hpp"
+
+int main(int argc, char **argv) {
+	Sp::ShipsConfig::Instance().Config();
+	CppUnit::TextUi::TestRunner runner;
+	//runner.addTest( ExampleTestCase::suite() );
+	runner.addTest(PluginPNGTest::suite());
+	runner.addTest(FileInputStreamTest::suite());
+	runner.run();
+	return 0;
 }

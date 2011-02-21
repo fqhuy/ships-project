@@ -5,8 +5,8 @@ macro(define_ships_module name)
 	project(ships_${name})
 	add_definitions(-DSPAPI_EXPORTS)
 
-	include_directories("${CMAKE_CURRENT_SOURCE_DIR}/inc"
-						"${OPENCL_INCLUDE_PATH}"
+	include_directories("${CPLUS_INCLUDE_PATH}"
+						"${CMAKE_CURRENT_SOURCE_DIR}/inc"
 	                    "${CMAKE_CURRENT_SOURCE_DIR}/src"
 	                    "${CMAKE_CURRENT_BINARY_DIR}")
 	

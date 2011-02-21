@@ -13,9 +13,13 @@ if (NOT CMAKE_INSTALL_PREFIX)
     endif()
 endif()
 
-SET(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/lib")
+if(UNIX)
+	set(SHIPS_HOME_RPATH "$ENV{HOME}")
+	set(CPLUS_INCLUDE_PATH "/usr/include/nvidia-current")
+endif()
+
+SET(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/lib/ships")
 SET(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
-set(OPENCL_INCLUDE_PATH /usr/include/nvidia-current)
 
 set(CMAKE_CONFIGURATION_TYPES "Debug;Release" CACHE STRING "Configs" FORCE)
 set(CMAKE_C_FLAGS_MINSIZEREL "" CACHE INTERNAL "" FORCE)
@@ -192,6 +196,12 @@ if(CMAKE_COMPILER_IS_GNUCXX)
     endif()
 endif()
 
+set(WITH_PNG ON CACHE BOOL "Include PNG support")
+#set(WITH_JPEG ON CACHE BOOL "Include JPEG support")
+#set(WITH_JASPER ON CACHE BOOL "Include JPEG2K support")
+#set(WITH_TIFF ON CACHE BOOL "Include TIFF support")
+#set(WITH_OPENEXR ON CACHE BOOL "Include ILM support via OpenEXR")
+
 if(WITH_PNG AND NOT PNG_FOUND)
     set(PNG_LIBRARIES libpng)
 endif()
@@ -206,6 +216,36 @@ endif()
 
 if(WITH_JASPER AND NOT JASPER_FOUND)
     set(JASPER_LIBRARIES libjasper)
+endif()
+
+############################### QT ################################
+set(WITH_QT ON CACHE BOOL "Build with Qt Backend support")
+set(WITH_QT_OPENGL ON CACHE BOOL "Add OpenGL extension to Qt")
+
+set(HAVE_QT 0)
+set(HAVE_QT_OPENGL 0)
+
+if (WITH_QT)
+    find_package(Qt4)
+    if (QT4_FOUND)
+        set(HAVE_QT 1)
+                add_definitions(-DHAVE_QT)#We need to define te macro this way, using cvconfig.h.cmake does not work
+
+        find_package (OpenGL QUIET)
+
+
+		#if (NOT WIN32)
+		if (WITH_QT_OPENGL)
+			if (QT_QTOPENGL_FOUND AND OPENGL_FOUND)
+				set(HAVE_QT_OPENGL 1)
+				add_definitions(-DHAVE_QT_OPENGL)
+				#link_directories("${OPENGL_LIBRARIES}")
+				set(OPENCV_LINKER_LIBS ${OPENCV_LINKER_LIBS} ${OPENGL_LIBRARIES})
+			endif()
+		 endif()
+		#endif()
+
+    endif()
 endif()
 
 # ----------------------------------------------------------------------------
@@ -229,6 +269,7 @@ configure_file("${CMAKE_CURRENT_SOURCE_DIR}/shipsconfig.h.cmake" "${SHIPS_CONFIG
 # The C+//0 include & link directories:
 # ---------------------------------------------------------------------------
 include_directories("."
+	"${CPLUS_INCLUDE_PATH}"
     "${SHIPS_CONFIG_FILE_INCLUDE_DIR}"
     "${CMAKE_CURRENT_SOURCE_DIR}/inc"
     "${CMAKE_CURRENT_SOURCE_DIR}/inc/ships"

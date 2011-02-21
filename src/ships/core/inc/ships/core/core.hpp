@@ -4,29 +4,39 @@
 #include <limits.h>
 #include <algorithm>
 #include <cmath>
+#include <cstring>
+#include <stdint.h>
 #include <complex>
 #include <map>
 #include <new>
 #include <string>
 #include <vector>
-#include <boost/numeric/ublas/matrix.hpp>
-#include <boost/numeric/ublas/io.hpp>
-//#include "viennacl/ocl/program.hpp"
-//#include "viennacl/ocl/kernel.hpp"
-//#include "viennacl/vector.hpp"
+#include <CL/cl.hpp>
+#include <libconfig.h++>
 
+#include "log4cxx/logger.h"
+#include "log4cxx/basicconfigurator.h"
+#include "log4cxx/xml/domconfigurator.h"
+#include "log4cxx/propertyconfigurator.h"
+#include "log4cxx/helpers/exception.h"
+
+#include "shipsconfig.h"
+#include "common.hpp"
 #include "allocator.hpp"
 #include "color.hpp"
 #include "config.hpp"
 #include "device_manager.hpp"
+#include "geometry_2d.hpp"
+#include "geometry_3d.hpp"
 #include "pixel.hpp"
-#include "vector.hpp"
+#include "memory_model.hpp"
+#include "array.hpp"
+#include "sample_model.hpp"
 #include "matrix.hpp"
+#include "vector.hpp"
 #include "image.hpp"
 #include "operations.hpp"
 
-
 namespace Sp {
-
 }
 #endif // SHIPS_CORE_HPP

@@ -16,7 +16,7 @@ ImageReader* ImageIO::GetImageReaderByFormat(const string& file_format) {
 	//			= static_cast<ImageReaderPlugin*> (PluginManager::GetPlugin(
 	//					file_format))->CreateImageReader();
 
-	return static_cast<ImageReaderPlugin*> (PluginManager::GetPlugin(file_format))->CreateImageReader();
+	//return static_cast<ImageReaderPlugin*> (PluginManager::GetPlugin(file_format))->CreateImageReader();
 }
 
 }

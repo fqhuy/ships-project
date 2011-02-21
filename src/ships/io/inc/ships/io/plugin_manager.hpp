@@ -1,90 +1,44 @@
 #ifndef __SHIPS_IO_PLUGIN_MANAGER__
 #define __SHIPS_IO_PLUGIN_MANAGER__
 
-using namespace std;
+namespace Sp {
 
-namespace Sp{
-	class PluginBase{
-		public:
-			virtual ~PluginBase(){};
-		protected:
-			string vendorName;
-			string version;
-		private:
+class PluginBase {
+public:
+	PluginBase(){}
+	virtual ~PluginBase() {
+	}
 
-	};
-        
-	class PluginManager{
-		public:
-			PluginManager();
-			virtual ~PluginManager(){};
-			
-			static PluginBase* GetPlugin(const string& name){return plugins_[name];
-			}
-			static map<string, PluginBase*>& GetPlugins(){return plugins_;
-			}
-			//bool Contains(const PluginBase& plugin);
-			static void Register(const string& plugin_name, PluginBase* plugin);
-			static void Deregister(const string& plugin_name);
-		protected:
-		
-		private:
-			static map<string, PluginBase*> plugins_;
-	};
+protected:
+	std::string vendor_name_;
+	std::string version_;
+private:
 
-	
+};
+
+class PluginManager {
+public:
+	typedef PluginManager SelfType;
+	virtual ~PluginManager() {
+	}
+
+	PluginBase* GetPlugin(const std::string& name) {
+		return plugins_[name];
+	}
+
+	//bool Contains(const PluginBase& plugin);
+	void Register(const std::string& plugin_name, PluginBase* plugin);
+	void Deregister(const std::string& plugin_name);
+
+	static SelfType Instance(){return instance_;}
+protected:
+	PluginManager();
+private:
+	static SelfType instance_;
+	std::map<std::string, PluginBase*> plugins_;
+};
 
 
-	class ImageReaderWriterPlugin:
-	public PluginBase {
-		public:
-			virtual ~ImageReaderWriterPlugin(){};
-			
-			//---------- GET ----------//
-			string& GetFormatName(){return format_name_;}
-			string& GetMIMEType(){return MIME_type_;}
-			//---------- TEG ----------//
-			//---------- SET ----------//
-			//---------- TES ----------//
-			
-			
-		protected:
-			string format_name_;
-			string MIME_type_;
-
-		private:
-	};
-	
-	class ImageReaderPlugin:
-	public ImageReaderWriterPlugin{
-		public:
-			virtual ~ImageReaderPlugin(){};
-			
-			virtual ImageReader* CreateImageReader()=0;
-		protected:
-		private:
-	};
-	
-	class ImageWriterPlugin:
-	public ImageReaderWriterPlugin{
-		public:
-			virtual ~ImageWriterPlugin(){};
-			
-			ImageWriter* CreateImageWriter();
-		protected:
-		private:	
-	};
-	
-	class DescriptorReaderWriterPlugin {
-		public:
-			virtual ~DescriptorReaderWriterPlugin(){};
-	};
-	
-	class DescriptorReaderPlugin:
-	public DescriptorReaderWriterPlugin {
-		public:
-			virtual ~DescriptorReaderPlugin(){};
-	};
 
 }
 

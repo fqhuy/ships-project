@@ -26,17 +26,13 @@ public:
 
 	//---------- GET ----------//
 
-	MatrixAdapter<ValueType>*& GetMatrix() {
-
-		return matrix_;
-	}
-
 	//---------- TEG ----------//
 
 protected:
 	int channels_;
 	int depth_;
-	MatrixAdapter<ValueType>* matrix_;
+	Array<T> array_;
+	//SampleModel sample_model_;
 	ColorModel color_model_;
 	ImageMetaData meta_data_;
 private:
