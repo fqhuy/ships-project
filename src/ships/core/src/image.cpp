@@ -1,19 +1,19 @@
 #include <ships/core/core.hpp>
 
 namespace Sp {
-	ImageMetaData::ImageMetaData(){
+	ImageMetadata::ImageMetadata(){
 
 	}
 
-    template<class T> Image<T>::Image() {
+    template<class T1, class T2> Image<T1,T2>::Image() {
 
     }
 
-    template<class T> Image<T>::Image(const Image<T>& img){
+    template<class T1, class T2> Image<T1, T2>::Image(const Image<T1, T2>& img){
 
     }
 
-    template<class T> HostImage<T>::HostImage(){}
+    template<class T1, class T2> HostImage<T1, T2>::HostImage(){}
 
 
 }

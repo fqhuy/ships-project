@@ -31,11 +31,18 @@ template<> struct Type2Const<int32_t>{
 template<> struct Type2Const<uint32_t>{
 	enum {type = CL_UNSIGNED_INT32, norm_type = CL_UNORM_INT8};
 };
-
 template<> struct Type2Const<float>{
 	enum {type = CL_FLOAT};
 };
-
+template<> struct Type2Const<double>{
+	enum {type = CL_FLOAT};
+};
+/**
+ * this class express the structure of underlined raw data.
+ * @author Phan Quoc Huy (diepvien00thayh@gmail.com)
+ * @param T1 value type
+ * @param T2 storage type
+ */
 template<class T1, class T2> class SampleModel {
 public:
 	typedef T1 ValueType1;
@@ -68,6 +75,17 @@ public:
 	virtual Array<ValueType2>* CreateArray(
 			MemoryModel<ValueType2>* memory_model) = 0;
 	/**
+	 * @return size of the area in number of elements
+	 */
+	SHIPS_INLINE
+	uint32_t GetSize(){
+		uint32_t re=1;
+		for(int i=0;i<num_dims_;i++){
+			re*=dims_[i];
+		}
+		return re;
+	}
+	/**
 	 * @param array the array that this model will look for a specific sample.
 	 * @param channel sample channel.
 	 * @param x x position.
@@ -76,7 +94,7 @@ public:
 	 * @return the sample value from input array.
 	 */
 	virtual ValueType1 GetSample(Array<ValueType2>* array, int x, int y, int z,
-			int channel = 0) =0;
+			int channel) =0;
 	/**
 	 * @param array the array that this model will look for a specific sample.
 	 * @param channel sample channel.
@@ -85,30 +103,29 @@ public:
 	 * @return the sample value from input array.
 	 */
 	virtual ValueType1 GetSample(Array<ValueType2>* array, int x, int y,
-			int channel = 0) =0;
+			int channel) =0;
 	/**
 	 * @param array the array that this model will look for a specific sample.
 	 * @param channel sample channel.
 	 * @param x x position.
 	 * @return the sample value from input array.
 	 */
-	virtual ValueType1 GetSample(Array<ValueType2>* array, int x, int channel =
-			0)=0;
+	virtual ValueType1 GetSample(Array<ValueType2>* array, int x, int channel )=0;
 	/**
 	 *
 	 */
 	virtual void SetSample(Array<ValueType2>* array, ValueType1 value, int x,
-			int channel = 0) =0;
+			int channel) =0;
 	/**
 	 *
 	 */
 	virtual void SetSample(Array<ValueType2>* array, ValueType1 value, int x,
-			int y, int channel = 0) =0;
+			int y, int channel) =0;
 	/**
 	 *
 	 */
 	virtual void SetSample(Array<ValueType2>* array, ValueType1 value, int x,
-			int y, int z, int channel = 0)=0;
+			int y, int z, int channel)=0;
 	/**
 	 * @param array the array that this model will look for samples
 	 * @param x
@@ -135,21 +152,27 @@ protected:
 	uint32_t num_dims_;
 	uint32_t* dims_;
 
-	SHIPS_INLINE SampleModel(uint32_t num_channels, uint32_t num_dims,
+	SHIPS_INLINE
+	SampleModel(uint32_t num_channels, uint32_t num_dims,
 			uint32_t* dims) :
 		num_channels_(num_channels), num_dims_(num_dims), dims_(dims) {
 	}
-	/**
-	 * @param width the width of the area of the array which this sample model describe
-	 * @param height the height of the area
-	 * @param depth
-	 * @param num_channels the number of channels
-	 */
-	//SHIPS_INLINE SampleModel(uint32_t width, uint32_t height, uint32_t depth,
-	//		uint32_t num_channels) {
-	//	num_channels_ = num_channels;
-	//dims_ = new uint32_t[]
-	//}
+
+	SHIPS_INLINE
+	virtual uint32_t CalculateBufferSize(uint8_t alignment){
+		uint32_t size = num_channels_;
+		if(!dims_)
+			return 0;
+		for(int i=0;i<num_dims_;i++){
+			size*=dims_[i];
+		}
+		if(size % alignment==0){
+			return size;
+		} else {
+			size = (size/alignment + 1)*alignment;
+			return size;
+		}
+	}
 };
 
 template<class T> class ComponentSampleModel: public SampleModel<T, T> {
@@ -182,21 +205,22 @@ public:
 
 	virtual ~PixelInterleavedSampleModel() {
 	}
-	/*
+	/**
 	 * CL_R, CL_Rx or CL_A
 	 * CL_INTENSITY. This format can only be used if channel data type = CL_UNORM_INT8,
 	 * CL_UNORM_INT16, CL_SNORM_INT8, CL_SNORM_INT16, CL_HALF_FLOAT or
-	 CL_FLOAT.
-	 CL_LUMINANCE. This format can only be used if channel data type =
-	 CL_UNORM_INT8, CL_UNORM_INT16, CL_SNORM_INT8, CL_SNORM_INT16,
-	 CL_HALF_FLOAT or CL_FLOAT.
-	 CL_RG, CL_RGx or CL_RA
-	 CL_RGB or CL_RGBx. This format can only be used if channel data type =
-	 CL_UNORM_SHORT_565, CL_UNORM_SHORT_555, or CL_UNORM_INT_101010.
-	 CL_RGBA
-	 CL_ARGB, CL_BGRA. This format can only be used if channel data type =
-	 CL_UNORM_INT8, CL_SNORM_INT8, CL_SIGNED_INT8 or CL_UNSIGNED_INT8.
-	 *
+	 * CL_FLOAT.
+	 * CL_LUMINANCE. This format can only be used if channel data type =
+	 * CL_UNORM_INT8, CL_UNORM_INT16, CL_SNORM_INT8, CL_SNORM_INT16,
+	 * CL_HALF_FLOAT or CL_FLOAT.
+	 * CL_RG, CL_RGx or CL_RA
+	 * CL_RGB or CL_RGBx. This format can only be used if channel data type =
+	 * CL_UNORM_SHORT_565, CL_UNORM_SHORT_555, or CL_UNORM_INT_101010.
+	 * CL_RGBA
+	 * CL_ARGB, CL_BGRA. This format can only be used if channel data type =
+	 * CL_UNORM_INT8, CL_SNORM_INT8, CL_SIGNED_INT8 or CL_UNSIGNED_INT8.
+	 * @param memory_model memory model to create the data buffer
+	 * @return pointer to Array object
 	 */
 	Array<ValueType>* CreateArray(MemoryModel<ValueType>* memory_model);
 
@@ -216,21 +240,29 @@ public:
 			int channel = 0) {
 		return array->Get(x * (this->num_channels_) + channel, y, z);
 	}
-
+	/**
+	 * @see SampleModel
+	 */
+	SHIPS_INLINE
 	void SetSample(Array<ValueType>* array, ValueType value, int x,
 			int channel = 0) {
+		array->Set(value,x * (this->num_channels_) + channel);
 	}
 	/**
 	 *
 	 */
+	SHIPS_INLINE
 	void SetSample(Array<ValueType>* array, ValueType value, int x, int y,
 			int channel = 0) {
+		array->Set(value,x * (this->num_channels_) + channel,y);
 	}
 	/**
 	 *
 	 */
+	SHIPS_INLINE
 	void SetSample(Array<ValueType>* array, ValueType value, int x, int y,
 			int z, int channel = 0) {
+		array->Set(value,x * (this->num_channels_) + channel,y,z);
 	}
 private:
 	typedef ComponentSampleModel<T> Super;

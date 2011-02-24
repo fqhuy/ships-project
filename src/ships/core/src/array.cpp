@@ -21,6 +21,8 @@ INSTANTIATE_ARRAY(int16_t);
 INSTANTIATE_ARRAY(uint16_t);
 INSTANTIATE_ARRAY(int32_t);
 INSTANTIATE_ARRAY(uint32_t);
+INSTANTIATE_ARRAY(int64_t);
+INSTANTIATE_ARRAY(uint64_t);
 INSTANTIATE_ARRAY(float);
 INSTANTIATE_ARRAY(double);
 
@@ -45,6 +47,8 @@ template<class T> void Array<T>::Init(uint32_t num_dims, uint32_t* dims,
 	switch(num_dims){
 	case 1:
 		data_ = memory_model_->CreateArray(dims[0]);
+		if(data_==NULL)
+			LOG4CXX_ERROR(Sp::core_logger, "array.cpp: error in creating data_");
 		break;
 	case 2:
 		// TODO: fix this
@@ -88,7 +92,7 @@ template<class T> void Array<T>::Init(uint32_t num_dims, uint32_t* dims,
 		}
 	}
 
-	steps_ = new cl_uint[num_dims];
+	steps_ = new uint32_t[num_dims];
 	int total = 1;
 	int i;
 	for (i = 0; i < num_dims; i++) {
@@ -98,8 +102,6 @@ template<class T> void Array<T>::Init(uint32_t num_dims, uint32_t* dims,
 	for (i = 1; i < num_dims; i++) {
 		steps_[i] = steps_[i - 1] / dims[num_dims - i - 1];
 	}
-
-
 }
 
 

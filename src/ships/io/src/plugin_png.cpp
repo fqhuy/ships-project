@@ -17,7 +17,7 @@ void PNGImageReader::SetURL(const string& url) {
 	url_ = url;
 }
 
-template<class T> bool PNGImageReader::Read(const string& url, Image<T>* img) {
+template<class T1, class T2> bool PNGImageReader::Read(const string& url, Image<T1,T2>* img) {
 	bool result = false;
 	//Image<T>* img = new Image<T>();
 
@@ -25,11 +25,11 @@ template<class T> bool PNGImageReader::Read(const string& url, Image<T>* img) {
 }
 
 template<class T> bool PNGImageReader::Read(const string& url,
-		Image<Pixel<T> >* img) {
+		Image<Pixel<T>,Pixel<T> >* img) {
 
 }
 
-ImageMetaData PNGImageReader::GetImageMetadata() {
+ImageMetadata PNGImageReader::GetImageMetadata() {
 }
 
 }

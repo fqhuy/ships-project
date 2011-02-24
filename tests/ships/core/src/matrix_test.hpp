@@ -8,15 +8,11 @@
 #ifndef MATRIX_TEST_HPP_
 #define MATRIX_TEST_HPP_
 
-
-#include <cppunit/TestFixture.h>
-#include <cppunit/TestSuite.h>
-#include <cppunit/extensions/HelperMacros.h>
-
 class MatrixTest: public CppUnit::TestFixture {
 
 	CPPUNIT_TEST_SUITE( MatrixTest );
 	CPPUNIT_TEST( testAdd );
+	CPPUNIT_TEST( testSub );
 	CPPUNIT_TEST_SUITE_END();
 
 	private:
@@ -24,26 +20,31 @@ class MatrixTest: public CppUnit::TestFixture {
 		int width_, height_;
 	public:
 		void setUp() {
-			width_ = 300;
-			height_ = 300;
+			LOG4CXX_INFO(Sp::core_logger, "matrix_test: creating matrix...");
+			width_ = 4;
+			height_ = 4;
 
 			matrix_ = new Sp::Matrix<int, int>(width_ , height_);
 			for(int i=0;i<width_;i++)
 				for(int j=0;j<height_;j++)
-					matrix_->Set(1,i,j);
+					matrix_->Set(i*j,i,j);
 		}
 
 		void tearDown() {
-			delete matrix_;
+			//delete matrix_;
 		}
 
 		void testAdd() {
-			int value = 10;
-			matrix_->Add(value);
+			//int value = 10;
+			//matrix_->Add(value);
 
-			for(int i=0;i<width_;i++)
-				for(int j=0;j<height_;j++)
-					LOG4CXX_INFO(Sp::core_logger, matrix_->Get(i,j));
+			//for(int i=0;i<width_;i++)
+			//	for(int j=0;j<height_;j++)
+			//		LOG4CXX_INFO(Sp::core_logger, matrix_->Get(i,j));
+		}
+
+		void testSub() {
+
 		}
 
 };

@@ -9,7 +9,7 @@ class ImageReader {
 public:
 	virtual ~ImageReader() {
 	}
-	;
+
 	//---------- GET ----------//
 	int GetWidth() const {
 		return width_;
@@ -20,7 +20,7 @@ public:
 	virtual std::string& GetURL() {
 		return url_;
 	}
-	virtual ImageMetaData GetImageMetadata() {
+	virtual ImageMetadata GetImageMetadata() {
 		return metadata_;
 	}
 	//---------- TEG ----------//
@@ -29,11 +29,11 @@ public:
 		url_ = url;
 	}
 	//---------- TES ----------//
-	template<class T> bool Read(const std::string& url, Image<T>* img) {
+	template<class T1, class T2> bool Read(const std::string& url, Image<T1, T2>* img) {
 	}
 
 protected:
-	ImageMetaData metadata_;
+	ImageMetadata metadata_;
 	int width_;
 	int height_;
 	std::string url_;
@@ -100,8 +100,8 @@ public:
 	ImageReader* GetImageReaderByFormat(const std::string& file_format);
 	//ImageWriter* GetImageWriterByFormat(const std::string& file_format);
 	//---------- TEG----------//
-	template<class T> static bool Read(const std::string& file_name,
-			Image<T>* img);
+	template<class T1, class T2> static bool Read(const std::string& file_name,
+			Image<T1, T2>* img);
 	//template<class T> static void Write(const Image<T>& image, const std::string& file_format, const std::string& file_name);
 protected:
 

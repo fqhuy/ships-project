@@ -5,7 +5,7 @@ namespace Sp {
 ImageIO::ImageIO() {
 }
 
-template<class T> bool ImageIO::Read(const string& file_name, Image<T>* img) {
+template<class T1, class T2> bool ImageIO::Read(const string& file_name, Image<T1, T2>* img) {
 	//only PNG is supported by now
 	return GetImageReaderByFormat("png")->Read(file_name, img);
 }

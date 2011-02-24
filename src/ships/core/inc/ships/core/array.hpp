@@ -16,14 +16,14 @@ public:
 	typedef T& Reference;
 	typedef const T& ConstReference;
 	typedef T* Pointer;
-	/*
-	SHIPS_INLINE
-	Array(int width, int height, ValueType init_value=0){
-		MemoryModel<ValueType>* mm = new MemoryModel<ValueType>(2);
-		uint32_t dims[]= {width, height};
-		Init(2, dims, mm, init_value);
-	}
-	*/
+
+	 SHIPS_INLINE
+	 Array(uint32_t size, ValueType init_value=0){
+	 //MemoryModel<ValueType>* mm = new MemoryModel<ValueType>(2);
+	 //uint32_t dims[]= {width, height};
+	 //Init(2, dims, mm, init_value);
+	 }
+
 	/*
 	 * Array constructor
 	 * @param num_dims the number of dimensions of the array.
@@ -31,9 +31,9 @@ public:
 	 * @param memory_model the memory model of this Array.
 	 * @param init_value the initial value of the array, default is 0.
 	 */
-	SHIPS_INLINE
-	Array(int width, int height, MemoryModel<ValueType>* memory_model, ValueType init_value=0){
-		uint32_t dims[]= {width, height};
+	SHIPS_INLINE Array(int width, int height,
+			MemoryModel<ValueType>* memory_model, ValueType init_value = 0) {
+		uint32_t dims[] = { width, height };
 		Init(2, dims, memory_model, init_value);
 	}
 	/*
@@ -43,8 +43,7 @@ public:
 	 * @param memory_model the memory model of this Array.
 	 * @param init_value the initial value of the array, default is 0.
 	 */
-	SHIPS_INLINE
-	Array(int num_dims, uint32_t* dims,
+	SHIPS_INLINE Array(int num_dims, uint32_t* dims,
 			MemoryModel<ValueType>* memory_model, ValueType init_value = 0) {
 		Init(num_dims, dims, memory_model, init_value);
 	}
@@ -76,10 +75,15 @@ public:
 
 	SHIPS_INLINE
 	size_t GetSize() {
-		size_t re=1;
-		for (int i=0; i< num_dims_; i++)
-			re*=dims_[i];
+		size_t re = 1;
+		for (int i = 0; i < num_dims_; i++)
+			re *= dims_[i];
 		return re;
+	}
+
+	SHIPS_INLINE
+	MemoryModel<ValueType>& GetMemoryModel() {
+		return *memory_model_;
 	}
 
 	SHIPS_INLINE
@@ -93,17 +97,32 @@ public:
 
 	SHIPS_INLINE
 	virtual ValueType Get(int index) {
-		return data_[index];
+		try {
+			if (memory_model_->IsMapped())
+				return data_[index];
+			else
+				throw "the memory isn't mapped.";
+		} catch (char* msg) {
+			LOG4CXX_ERROR(Sp::core_logger, msg);
+		}
+
 	}
 
 	SHIPS_INLINE
 	virtual ValueType Get(int x, int y) {
-		return data_[steps_[0] * y + x];
+		try {
+			if (memory_model_->IsMapped())
+				return data2d_[x][y];
+			else
+				throw "the memory isn't mapped.";
+		} catch (char* msg) {
+			LOG4CXX_ERROR(Sp::core_logger, msg);
+		}
 	}
-
+	//TODO: another try catch here.
 	SHIPS_INLINE
 	virtual ValueType Get(int x, int y, int z) {
-		return data_[steps_[0] * z + steps_[1] * y + x];
+		return data3d_[x][y][z];
 	}
 
 	SHIPS_INLINE
@@ -122,12 +141,12 @@ public:
 
 	SHIPS_INLINE
 	virtual void Set(ValueType value, int x, int y) {
-		data_[steps_[0] * y + x] = value;
+		data2d_[x][y] = value;
 	}
 
 	SHIPS_INLINE
 	virtual void Set(ValueType value, int x, int y, int z) {
-		data_[steps_[0] * z + steps_[1] * y + x] = value;
+		data3d_[x][y][z] = value;
 	}
 protected:
 	cl_uint* steps_;
@@ -139,11 +158,12 @@ protected:
 	cl_uint* dims_;
 	MemoryModel<ValueType>* memory_model_;
 
-	void Init(uint32_t num_dims, uint32_t* dims,MemoryModel<ValueType>* memory_model, ValueType init_value = 0);
+	void Init(uint32_t num_dims, uint32_t* dims,
+			MemoryModel<ValueType>* memory_model, ValueType init_value = 0);
 
 	SHIPS_INLINE
-	bool CheckCompatability(){
-		if(num_dims_ == memory_model_->GetNumDims())
+	bool CheckCompatability() {
+		if (num_dims_ == memory_model_->GetNumDims())
 			return true;
 
 		return false;
@@ -161,26 +181,25 @@ public:
 	typedef T* Pointer;
 	typedef const T* ConstPointer;
 
-	SHIPS_INLINE
-	HostArray(int num_dims, uint32_t* dims,
-			HostMemoryModel<ValueType>* memory_model, ValueType init_value = 0) :
-		Super (num_dims, dims, memory_model, init_value) {
+	SHIPS_INLINE HostArray(int num_dims, uint32_t* dims, HostMemoryModel<
+			ValueType>* memory_model, ValueType init_value = 0) :
+		Super(num_dims, dims, memory_model, init_value) {
 
 	}
 
-	SHIPS_INLINE
-	HostArray(int num_dims, uint32_t* dims,
-			HostMemoryModel<ValueType>* memory_model, ConstPointer data) //:Super (num_dims, dims, memory_model)
+	SHIPS_INLINE HostArray(int num_dims, uint32_t* dims, HostMemoryModel<
+			ValueType>* memory_model, ConstPointer data) //:Super (num_dims, dims, memory_model)
 	{
 		this->data_ = data;
 	}
 
 	SHIPS_INLINE
-	Super* Clone(){
+	Super* Clone() {
 		Pointer data = new ValueType[this->GetSize()];
-		std::copy(this->data_,this->data_ + this->GetSize(), data);
-		HostMemoryModel<ValueType>* hmm = new HostMemoryModel<ValueType>();
-		SelfType* re = new SelfType(this->num_dims_, this->dims_, this->memory_model_, hmm, data );
+		std::copy(this->data_, this->data_ + this->GetSize(), data);
+		HostMemoryModel<ValueType>* hmm = new HostMemoryModel<ValueType> ();
+		SelfType* re = new SelfType(this->num_dims_, this->dims_,
+				this->memory_model_, hmm, data);
 		return re;
 	}
 protected:
@@ -195,9 +214,8 @@ public:
 	typedef const T& ConstReference;
 	typedef T* Pointer;
 
-	SHIPS_INLINE
-	DeviceArray(int num_dims, uint32_t* dims,
-			DeviceMemoryModel<ValueType>* memory_model, ValueType init_value = 0) :
+	SHIPS_INLINE DeviceArray(int num_dims, uint32_t* dims, DeviceMemoryModel<
+			ValueType>* memory_model, ValueType init_value = 0) :
 		Array<T> (num_dims, dims, memory_model, init_value) {
 
 	}

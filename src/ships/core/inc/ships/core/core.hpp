@@ -6,16 +6,13 @@
 #include <cmath>
 #include <cstring>
 #include <stdint.h>
-#include <complex>
 #include <map>
-#include <new>
 #include <string>
 #include <vector>
 #include <CL/cl.hpp>
 #include <libconfig.h++>
 
 #include "log4cxx/logger.h"
-#include "log4cxx/basicconfigurator.h"
 #include "log4cxx/xml/domconfigurator.h"
 #include "log4cxx/propertyconfigurator.h"
 #include "log4cxx/helpers/exception.h"
@@ -32,6 +29,7 @@
 #include "memory_model.hpp"
 #include "array.hpp"
 #include "sample_model.hpp"
+#include "metadata.hpp"
 #include "matrix.hpp"
 #include "vector.hpp"
 #include "image.hpp"

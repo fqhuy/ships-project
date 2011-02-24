@@ -29,7 +29,39 @@ public:
 
 	void testReadLine() {
 		std::string s = fis_->ReadLine(1024);
-		LOG4CXX_INFO(Sp::io_logger,s);
+		char name[256];
+		char type[256];
+		int rows, cols;
+
+		s = fis_->ReadLine(1024);
+		sscanf(s.c_str(),"# name: %s",name);
+
+		s = fis_->ReadLine(1024);
+		sscanf(s.c_str(),"# type: %s",type);
+
+		s = fis_->ReadLine(1024);
+		sscanf(s.c_str(),"# rows: %d",&rows);
+
+		s = fis_->ReadLine(1024);
+		sscanf(s.c_str(),"# columns: %d",&cols);
+
+		float data[rows][cols];
+		LOG4CXX_INFO(Sp::io_logger, "name: " << name << " type: " << type << " rows: " << rows << " cols: " << cols << '\n');
+		/*
+		for(int i=0;i<rows;i++){
+			fis_->ReadLine(128,' ');
+			for (int j=0;j<cols-1;j++){
+				s = fis_->ReadLine(128,' ');
+				sscanf(s.c_str(),"%f",&data[i][j]);
+				LOG4CXX_INFO(Sp::io_logger, " " << data[i][j]);
+			}
+			s = fis_->ReadLine(128,'\n');
+			sscanf(s.c_str(),"%f",&data[i][cols-1]);
+			LOG4CXX_INFO(Sp::io_logger, " " << data[i][cols-1] << "\n");
+		}
+		*/
+
+
 	}
 
 };

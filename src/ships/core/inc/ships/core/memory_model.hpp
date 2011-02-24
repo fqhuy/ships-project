@@ -5,8 +5,8 @@
  *      Author: fqhuy
  */
 
-#ifndef __SHIPS_CORE_MODEL_HPP_
-#define __SHIPS_CORE_MODEL_HPP_
+#ifndef SHIPS_CORE_MODEL_HPP_
+#define SHIPS_CORE_MODEL_HPP_
 
 namespace Sp {
 
@@ -19,9 +19,10 @@ public:
 	typedef T ValueType;
 	typedef T* Pointer;
 
-	SHIPS_INLINE MemoryModel(uint32_t num_dims, bool mapped = true,
-			bool pinned = false, AccessModes access_mode = READ_WRITE) :
-		num_dims_(num_dims), mapped_(mapped), access_mode_(access_mode),
+	SHIPS_INLINE
+	MemoryModel(uint32_t num_dims, bool mapped = true,
+			bool pinned = false, uint8_t alignment=4,AccessModes access_mode = READ_WRITE) :
+		num_dims_(num_dims), mapped_(mapped), alignment_(alignment), access_mode_(access_mode),
 				pinned_(pinned) {
 	}
 
@@ -47,6 +48,15 @@ public:
 		image_format_ = image_format;
 	}
 
+	SHIPS_INLINE
+	virtual uint8_t GetAlignment(){
+		return alignment_;
+	}
+
+	SHIPS_INLINE
+	virtual void SetAlignment(uint8_t alignment){
+		alignment_ = alignment;
+	}
 	//map all elements
 	virtual Pointer Map();
 	//map some elements
@@ -60,6 +70,7 @@ public:
 	virtual Pointer CreateArray(uint32_t width, uint32_t height);
 	//virtual void* CreateArray(size_t width, size_t height, size_t depth);
 protected:
+	uint8_t alignment_;
 	uint32_t num_dims_;
 	bool mapped_;
 	AccessModes access_mode_;
@@ -79,7 +90,8 @@ template<class T> class HostMemoryModel: public MemoryModel<T> {
 public:
 	typedef T ValueType;
 	typedef T* Pointer;
-	SHIPS_INLINE HostMemoryModel(uint32_t num_dims) :
+	SHIPS_INLINE
+	HostMemoryModel(uint32_t num_dims) :
 		Super(num_dims) {
 	}
 	virtual ~HostMemoryModel() {
@@ -101,7 +113,8 @@ public:
 	typedef T ValueType;
 	typedef T* Pointer;
 
-	SHIPS_INLINE DeviceMemoryModel(uint32_t num_dims, bool mapped = false) :
+	SHIPS_INLINE
+	DeviceMemoryModel(uint32_t num_dims, bool mapped = false) :
 		Super(num_dims, mapped) {
 	}
 
@@ -120,4 +133,4 @@ private:
 };
 
 }
-#endif /* __SHIPS_CORE_MODEL_HPP_ */
+#endif /* SHIPS_CORE_MODEL_HPP_ */

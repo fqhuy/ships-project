@@ -13,6 +13,7 @@
 
 #include "plugin_png_test.hpp"
 #include "iostream_test.hpp"
+#include "plugin_octave_text_matrix_test.hpp"
 
 int main(int argc, char **argv) {
 	Sp::ShipsConfig::Instance().Config();
@@ -20,6 +21,7 @@ int main(int argc, char **argv) {
 	//runner.addTest( ExampleTestCase::suite() );
 	runner.addTest(PluginPNGTest::suite());
 	runner.addTest(FileInputStreamTest::suite());
+	runner.addTest(PluginOctaveTextMatrixTest::suite());
 	runner.run();
 	return 0;
 }

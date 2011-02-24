@@ -19,49 +19,64 @@ namespace Sp {
 	template Matrix<T1, T2>& Matrix<T1, T2>::Multiply(const T1& value); \
 	template T1 Matrix<T1, T2>::Det();
 
+
 INSTANTIATE_MATRIX(uint8_t, uint8_t);
 INSTANTIATE_MATRIX(int8_t, int8_t);
 INSTANTIATE_MATRIX(uint16_t, uint16_t);
 INSTANTIATE_MATRIX(int16_t, int16_t);
 INSTANTIATE_MATRIX(uint32_t, uint32_t);
 INSTANTIATE_MATRIX(int32_t, int32_t);
+INSTANTIATE_MATRIX(uint64_t, uint64_t);
+INSTANTIATE_MATRIX(int64_t, int64_t);
 INSTANTIATE_MATRIX(float, float);
 INSTANTIATE_MATRIX(double, double);
 
 template<class T1, class T2> Matrix<T1, T2>::Matrix() {
+	//TODO: unimplemented Matrix constructor.
 }
 
 template<class T1, class T2> Matrix<T1, T2>::Matrix(const uint32_t& width,
 		const uint32_t& height) {
+	this->width_ = width;
+	this->height_ = height;
 	uint32_t* dims = new uint32_t[2];
 	dims[0] = width;
 	dims[1] = height;
 	this->sample_model_ = new PixelInterleavedSampleModel<T1>(1, 2, dims);
-	MemoryModel<T2>* memory_model = new MemoryModel<T2>(2,true,true,READ_WRITE);
+	MemoryModel<T2>* memory_model = new MemoryModel<T2>(2,true,true, sizeof(T2), READ_WRITE);
 	this->array_ = this->sample_model_->CreateArray(memory_model);
 }
 
 template<class T1, class T2> Matrix<T1, T2>::Matrix(const uint32_t& width,
 		const uint32_t& height, MemoryModel<T2>* memory_model, SampleModel<T1, T2>* sample_model) {
-	//this->array_ = new Array<T> (width, height, memory_model);
+	this->width_ = width;
+	this->height_ = height;
+	//TODO: sample_model is unchecked for NULL value.
+	this->sample_model_ = sample_model;
+	this->array_ = this->sample_model_->CreateArray(memory_model);
 }
-
+//TODO: change this to sample_model_->Get
 template<class T1, class T2> uint32_t Matrix<T1, T2>::GetWidth() {
-	return this->array_->GetWidth();
+	return this->width_;
 }
 
 template<class T1, class T2> uint32_t Matrix<T1, T2>::GetHeight() {
-	return this->array_->GetHeight();
+	return this->height_;
+}
+
+template<class T1, class T2> Array<T2>& Matrix<T1, T2>::GetArray(){
+	return *this->array_;
 }
 
 template<class T1, class T2> T1 Matrix<T1, T2>::Get(int x, int y) {
-	return this->array_->Get(x, y);
+	return this->sample_model_->GetSample(this->array_, x, y, 0);
 }
 
 template<class T1, class T2> void Matrix<T1, T2>::Set(T1 value, int x, int y) {
-	this->array_->Set(value, x, y);
+	this->sample_model_->SetSample(this->array_,value,x,y, 0);
+	//this->array_->Set(value, x, y);
 }
-
+//TODO: unimplemented matrix transposition.
 template<class T1, class T2> Matrix<T1, T2>& Matrix<T1, T2>::Transpose() {
 	return *this;
 }

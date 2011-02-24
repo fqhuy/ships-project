@@ -20,6 +20,7 @@
 #include "imageio.hpp"
 #include "iostream.hpp"
 #include "matrixio.hpp"
+#include "plugin_octave_text_matrix.hpp"
 #include "plugin_bmp.hpp"
 #include "plugin_png.hpp"
 

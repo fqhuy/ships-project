@@ -16,9 +16,9 @@ public:
 	virtual ~PNGImageReader() {
 	}
 	void SetURL(const string& url);
-	template<class T> bool Read(const string& url,Image<T>* img);
-	template<class T> bool Read(const string& url,Image<Pixel<T> >* img	);
-	ImageMetaData GetImageMetadata();
+	template<class T1, class T2> bool Read(const string& url,Image<T1,T2>* img);
+	template<class T> bool Read(const string& url,Image<Pixel<T>, Pixel<T> >* img	);
+	ImageMetadata GetImageMetadata();
 };
 }
 

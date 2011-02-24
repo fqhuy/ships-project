@@ -44,6 +44,10 @@ INSTANTIATE_MEMORY_MODEL(uint32_t);
 INSTANTIATE_HOST_MEMORY_MODEL(uint32_t);
 INSTANTIATE_DEVICE_MEMORY_MODEL(uint32_t);
 
+INSTANTIATE_MEMORY_MODEL(uint64_t);
+INSTANTIATE_HOST_MEMORY_MODEL(uint64_t);
+INSTANTIATE_DEVICE_MEMORY_MODEL(uint64_t);
+
 INSTANTIATE_MEMORY_MODEL(int8_t);
 INSTANTIATE_HOST_MEMORY_MODEL(int8_t);
 INSTANTIATE_DEVICE_MEMORY_MODEL(int8_t);
@@ -55,6 +59,10 @@ INSTANTIATE_DEVICE_MEMORY_MODEL(int16_t);
 INSTANTIATE_MEMORY_MODEL(int32_t);
 INSTANTIATE_HOST_MEMORY_MODEL(int32_t);
 INSTANTIATE_DEVICE_MEMORY_MODEL(int32_t);
+
+INSTANTIATE_MEMORY_MODEL(int64_t);
+INSTANTIATE_HOST_MEMORY_MODEL(int64_t);
+INSTANTIATE_DEVICE_MEMORY_MODEL(int64_t);
 
 INSTANTIATE_MEMORY_MODEL(float);
 INSTANTIATE_HOST_MEMORY_MODEL(float);
@@ -90,10 +98,10 @@ template<class T> void HostMemoryModel<T>::UnMap(){
 template<class T> T* MemoryModel<T>::CreateArray(uint32_t width) {
 	if(!this->context_())
 		this->context_ = DeviceManager::Instance().GetDefaultContext();
-
+	//TODO: currently, only CL_MEM_ALLOC_HOST_PTR constant is used.
 	switch(this->num_dims_){
 	case 1:
-		this->buffer_ = cl::Buffer(this->context_, this->pinned_ ? CL_MEM_ALLOC_HOST_PTR : CL_MEM_USE_HOST_PTR, width);
+		this->buffer_ = cl::Buffer(this->context_, CL_MEM_ALLOC_HOST_PTR , width);
 		break;
 	case 2:
 		break;
@@ -114,7 +122,8 @@ template<class T> T* MemoryModel<T>::CreateArray(uint32_t width, uint32_t height
 	case 2:
 
 		this->image2d_ = cl::Image2D(this->context_,CL_MEM_ALLOC_HOST_PTR , this->image_format_, width, height, 0, NULL, &err);
-		LOG4CXX_INFO(Sp::core_logger, "memory_model: err code " << err );
+		if(err!=CL_SUCCESS)
+			LOG4CXX_ERROR(Sp::core_logger, "memory_model: error in creating image: " << err);
 		break;
 	default:
 		return NULL;
