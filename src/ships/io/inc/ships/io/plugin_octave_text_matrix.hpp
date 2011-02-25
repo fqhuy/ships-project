@@ -11,9 +11,14 @@
 namespace Sp {
 class OctaveTextMatrixReader: public MatrixReader {
 public:
+	int ReadAsFloatMatrix(const std::string& url,
+			Matrix<float, float>*& matrix, MemoryModel<float>* memory_model =
+					NULL, SampleModel<float, float>* sample_model = NULL);
+
 	int ReadAsDoubleMatrix(const std::string& url,
 			Matrix<double, double>*& matrix, MemoryModel<double>* memory_model =
 					NULL, SampleModel<double, double>* sample_model = NULL);
+
 	int ReadAsInt32Matrix(const std::string& url,
 			Matrix<int32_t, int32_t>*& matrix,
 			MemoryModel<int32_t>* memory_model = NULL,
@@ -25,6 +30,9 @@ public:
 	int ReadAsInt8Matrix(const std::string& url,
 			Matrix<int8_t, int8_t>*& matrix, MemoryModel<int8_t>* memory_model =
 					NULL, SampleModel<int8_t,int8_t>* sample_model = NULL);
+protected:
+	template<class T1, class T2> int Read(const std::string& url,Matrix<T1, T2>*& matrix, MemoryModel<T2>* memory_model =
+			NULL, SampleModel<T1, T2>* sample_model = NULL);
 };
 class OctaveTextMatrixReaderPlugin: public MatrixReaderPlugin {
 public:

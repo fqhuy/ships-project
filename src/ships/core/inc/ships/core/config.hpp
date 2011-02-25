@@ -2,6 +2,14 @@
 #define __SHIPS_CORE_CONFIG_HPP__
 
 #if defined WIN32 || defined _WIN32
+#define SHIPS_HOME "HOMEPATH"
+#define SHIPS_HOME_DRIVE "HOMEDRIVE"
+#else
+#define SHIPS_HOME "HOME"
+//#define SHIPS_HOME_DRIVE ""
+#endif
+
+#if defined WIN32 || defined _WIN32
 #define SHIPS_CDECL __cdecl
 #define SHIPS_STDCALL __stdcall
 #else

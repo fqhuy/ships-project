@@ -8,12 +8,8 @@
 #ifndef IO_HPP
 #define	IO_HPP
 
-#include <string>
-#include <iostream>
 #include <fstream>
-#include <vector>
-#include <stdio.h>
-#include <map>
+
 #include "ships/core/core.hpp"
 
 #include "plugin_manager.hpp"

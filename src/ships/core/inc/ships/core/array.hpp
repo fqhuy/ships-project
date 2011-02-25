@@ -17,12 +17,11 @@ public:
 	typedef const T& ConstReference;
 	typedef T* Pointer;
 
-	 SHIPS_INLINE
-	 Array(uint32_t size, ValueType init_value=0){
-	 //MemoryModel<ValueType>* mm = new MemoryModel<ValueType>(2);
-	 //uint32_t dims[]= {width, height};
-	 //Init(2, dims, mm, init_value);
-	 }
+	SHIPS_INLINE Array(uint32_t size, ValueType init_value = 0) {
+		//MemoryModel<ValueType>* mm = new MemoryModel<ValueType>(2);
+		//uint32_t dims[]= {width, height};
+		//Init(2, dims, mm, init_value);
+	}
 
 	/*
 	 * Array constructor
@@ -84,6 +83,19 @@ public:
 	SHIPS_INLINE
 	MemoryModel<ValueType>& GetMemoryModel() {
 		return *memory_model_;
+	}
+
+	SHIPS_INLINE
+	Pointer GetData() {
+		return data_;
+	}
+	SHIPS_INLINE
+	Pointer* GetData2D() {
+		return data2d_;
+	}
+	SHIPS_INLINE
+	Pointer** GetData3D() {
+		return data3d_;
 	}
 
 	SHIPS_INLINE
@@ -216,9 +228,11 @@ public:
 
 	SHIPS_INLINE DeviceArray(int num_dims, uint32_t* dims, DeviceMemoryModel<
 			ValueType>* memory_model, ValueType init_value = 0) :
-		Array<T> (num_dims, dims, memory_model, init_value) {
-
+		Super (num_dims, dims, memory_model, init_value) {
+		this->memory_model_->UnMap();
 	}
+private:
+	typedef Array<T> Super;
 };
 }
 #endif /* ARRAY_HPP_ */

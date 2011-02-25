@@ -19,8 +19,8 @@ int main(int argc, char **argv) {
 	Sp::ShipsConfig::Instance().Config();
 	CppUnit::TextUi::TestRunner runner;
 	//runner.addTest( ExampleTestCase::suite() );
-	runner.addTest(PluginPNGTest::suite());
-	runner.addTest(FileInputStreamTest::suite());
+	//runner.addTest(PluginPNGTest::suite());
+	//runner.addTest(FileInputStreamTest::suite());
 	runner.addTest(PluginOctaveTextMatrixTest::suite());
 	runner.run();
 	return 0;

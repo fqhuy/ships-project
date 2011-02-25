@@ -29,8 +29,8 @@ namespace Sp {
 	template class DeviceMemoryModel<T>; \
 	template T* DeviceMemoryModel<T>::CreateArray(size_t width); \
 	template T* DeviceMemoryModel<T>::Map(int32_t offset, size_t size); \
-	template T* DeviceMemoryModel<T>::Map(); \
-	template void DeviceMemoryModel<T>::UnMap();
+	template T* DeviceMemoryModel<T>::Map();
+	//template void DeviceMemoryModel<T>::UnMap();
 
 INSTANTIATE_MEMORY_MODEL(uint8_t);
 INSTANTIATE_HOST_MEMORY_MODEL(uint8_t);
@@ -204,7 +204,7 @@ template<class T> T* DeviceMemoryModel<T>::CreateArray(uint32_t width){
 }
 
 template<class T> T* DeviceMemoryModel<T>::Map(int32_t offset, size_t size){
-	LOG4CXX_WARN( Sp::core_logger, "you are mapping a device memory model. it's recommended to use map on memory model only");
+	LOG4CXX_WARN( Sp::core_logger, "you are mapping on a device memory model. it's recommended to use mapping on MemoryModel only");
 	Super::Map(offset, size);
 }
 
@@ -212,8 +212,8 @@ template<class T> T* DeviceMemoryModel<T>::Map(){
 
 }
 
-template<class T> void DeviceMemoryModel<T>::UnMap(){
+//template<class T> void DeviceMemoryModel<T>::UnMap(){
 
-}
+//}
 
 }

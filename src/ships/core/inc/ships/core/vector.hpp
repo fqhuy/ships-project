@@ -22,7 +22,10 @@
 #define __SHIPS_CORE_VECTOR__
 
 namespace Sp {
-
+/**
+ * This class is an impl of mathematical vector.
+ * @author Phan Quoc Huy
+ */
 template<class T1, class T2> class Vector {
 public:
 	typedef Vector<T1, T2> SelfType;
@@ -32,6 +35,7 @@ public:
 	typedef const T1& ConstReference;
 	typedef T1* Pointer;
 
+	//TODO: Need copy constructor here.
 	Vector(const uint32_t& size);
 	Vector(const uint32_t& size, MemoryModel<ValueType2>* memory_model, SampleModel<ValueType1, ValueType2>* sample_model);
 	virtual ~Vector() {

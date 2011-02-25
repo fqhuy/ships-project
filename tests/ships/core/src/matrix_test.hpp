@@ -8,6 +8,9 @@
 #ifndef MATRIX_TEST_HPP_
 #define MATRIX_TEST_HPP_
 
+#include <cppunit/extensions/HelperMacros.h>
+#include <ships/core/core.hpp>
+
 class MatrixTest: public CppUnit::TestFixture {
 
 	CPPUNIT_TEST_SUITE( MatrixTest );
@@ -49,4 +52,23 @@ class MatrixTest: public CppUnit::TestFixture {
 
 };
 
+class DeviceMatrixTest: public CppUnit::TestFixture {
+
+	CPPUNIT_TEST_SUITE( DeviceMatrixTest );
+	CPPUNIT_TEST( testSet );
+	CPPUNIT_TEST( testGet );
+	CPPUNIT_TEST_SUITE_END();
+
+	private:
+		Sp::Matrix<float, float>* matrix_;
+		int width_, height_;
+	public:
+		DeviceMatrixTest();
+		virtual ~DeviceMatrixTest();
+		void setUp() ;
+		void tearDown() ;
+		void testSet() ;
+		void testGet() ;
+
+};
 #endif /* MATRIX_TEST_HPP_ */

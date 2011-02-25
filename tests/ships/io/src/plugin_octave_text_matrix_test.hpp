@@ -21,15 +21,15 @@ public:
 	}
 
 	void testReadAsDoubleMatrix() {
-	    Sp::Matrix<double,double>* matrix = NULL;
-	    reader_.ReadAsDoubleMatrix("data/octave_matrix",matrix);
+	    Sp::Matrix<float,float>* matrix = NULL;
+	    reader_.ReadAsFloatMatrix("data/frame0a",matrix);
 	    
 	    if(matrix==NULL)
 	    	LOG4CXX_ERROR(Sp::io_logger, "plugin_octave_text_matrix_test.hpp: error in reading matrix.");
 
 	    for(int i=0;i<matrix->GetHeight();i++)
-	      for(int j=0;j<matrix->GetWidth();j++)
-	    	  LOG4CXX_INFO(Sp::io_logger, matrix->Get(i,j));
+	     // for(int j=0;j<matrix->GetWidth();j++)
+	    	  LOG4CXX_INFO(Sp::io_logger, matrix->Get(i,0) << " : " << matrix->Get(i,1));
 
 	    //delete matrix;
 	}

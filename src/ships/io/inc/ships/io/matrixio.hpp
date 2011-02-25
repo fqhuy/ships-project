@@ -12,6 +12,10 @@ namespace Sp {
 
 class MatrixReader {
 public:
+	virtual int ReadAsFloatMatrix(const std::string& url,
+			Matrix<float, float>*& matrix,
+			MemoryModel<float>* memory_model =NULL,
+			SampleModel<float,float>* sample_model = NULL)=0;
 	/**
 	 * @param url url to the matrix (file, http url, ftp url, ldap url ... )
 	 * @param matrix the pointer to the matrix to be constructed.

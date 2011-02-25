@@ -15,7 +15,11 @@ ShipsConfig::ShipsConfig(){
 void ShipsConfig::Config(const string& file_name){
 	this->file_name_ = file_name;
 	this->config_.readFile(file_name.c_str());
-	this->ships_home_path = SHIPS_HOME_RPATH;
+
+	//char* shd = getenv(SHIPS_HOME_DRIVE);
+	//TODO: currently does not support windows.
+	char* sh = getenv(SHIPS_HOME);
+	this->ships_home_path = string(sh);
 	this->ships_home_path.append("/.ships");
 
 	libconfig::Setting& ships = this->config_.lookup("ships");
@@ -45,7 +49,8 @@ void ShipsConfig::Config(const string& file_name){
 }
 
 void ShipsConfig::Config(){
-	this->ships_home_path = SHIPS_HOME_RPATH;
+	char* sh = getenv(SHIPS_HOME);
+	this->ships_home_path = string(sh);
 	this->ships_home_path.append("/.ships");
 	Config(this->ships_home_path + "/ships.cfg");
 }

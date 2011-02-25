@@ -5,6 +5,7 @@
 #include <algorithm>
 #include <cmath>
 #include <cstring>
+#include <cstdlib>
 #include <stdint.h>
 #include <map>
 #include <string>
@@ -17,7 +18,7 @@
 #include "log4cxx/propertyconfigurator.h"
 #include "log4cxx/helpers/exception.h"
 
-#include "shipsconfig.h"
+//#include "shipsconfig.h"
 #include "common.hpp"
 #include "allocator.hpp"
 #include "color.hpp"
@@ -30,10 +31,11 @@
 #include "array.hpp"
 #include "sample_model.hpp"
 #include "metadata.hpp"
-#include "matrix.hpp"
 #include "vector.hpp"
+#include "matrix.hpp"
 #include "image.hpp"
 #include "operations.hpp"
+#include "timer.hpp"
 
 namespace Sp {
 }

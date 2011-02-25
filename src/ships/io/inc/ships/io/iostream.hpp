@@ -80,7 +80,7 @@ public:
 	FileInputStream(const std::string& file_name);
 	virtual ~FileInputStream(){
 		Close();
-		delete file_;
+		//delete file_;
 	}
 	virtual std::string ReadLine(uint32_t streamsize, char delim='\n');
 	virtual int8_t ReadInt8();

@@ -4,6 +4,6 @@ add_subdirectory(feature)
 add_subdirectory(io)
 #add_subdirectory(learning)
 #add_subdirectory(object)
-#add_subdirectory(video)
+add_subdirectory(video)
 #add_subdirectory(contrib)
 

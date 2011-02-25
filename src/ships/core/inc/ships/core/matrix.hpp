@@ -48,6 +48,9 @@ public:
 
 	virtual Array<ValueType2>& GetArray();
 
+	virtual Vector<ValueType1, ValueType2>* GetRow(const uint32_t& row);
+	virtual Vector<ValueType1, ValueType2>* GetColumn(const uint32_t& column);
+
 	virtual SelfType& Transpose();
 	virtual SelfType& Assign(const SelfType& matrix);
 	virtual SelfType& Add(const SelfType& matrix);
@@ -73,6 +76,21 @@ private:
 };
 
 template<class T1, class T2> class DeviceMatrix: public Matrix<T1, T2> {
+public:
+	typedef T1 ValueType1;
+	typedef T2 ValueType2;
+	typedef T1& Reference;
+	typedef const T1& ConstReference;
+	typedef T1* Pointer;
+	typedef DeviceMatrix<T1, T2> SelfType;
+	DeviceMatrix();
+	DeviceMatrix(const uint32_t& width, const uint32_t& height);
+	DeviceMatrix(const uint32_t& width, const uint32_t& height, MemoryModel<
+			ValueType2>* memory_model,
+			SampleModel<ValueType1, ValueType2>* sample_model): Super(width,height,memory_model,sample_model){}
+	virtual ~DeviceMatrix(){}
+private:
+	typedef Matrix<T1,T2> Super;
 };
 
 }

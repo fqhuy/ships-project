@@ -1,3 +1,10 @@
+/*
+ * test_ships_video.cpp
+ *
+ *  Created on: Feb 24, 2011
+ *      Author: fqhuy
+ */
+
 #include <cppunit/BriefTestProgressListener.h>
 #include <cppunit/CompilerOutputter.h>
 #include <cppunit/extensions/TestFactoryRegistry.h>
@@ -6,11 +13,8 @@
 #include <cppunit/TestRunner.h>
 
 #include <ships/core/core.hpp>
-#include "matrix_test.hpp"
-#include "vector_test.hpp"
-//#include "pixel_test.hpp"
-//#include "config_test.hpp"
-//#include "memory_model_test.hpp"
+#include <ships/io/io.hpp>
+#include <ships/video/video.hpp>
 
 int main(int argc, char **argv) {
 	Sp::ShipsConfig::Instance().Config();
