@@ -5,7 +5,7 @@
  *      Author: fqhuy
  */
 #include "matrix_test.hpp"
-CPPUNIT_TEST_SUITE_REGISTRATION(DeviceMatrixTest);
+//CPPUNIT_TEST_SUITE_REGISTRATION(DeviceMatrixTest);
 
 DeviceMatrixTest::DeviceMatrixTest() {
 

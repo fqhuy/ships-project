@@ -103,7 +103,72 @@ namespace Sp {
  };
  *
  */
+class Program;
+class Package;
+class Package {
+public:
 
+	Package();
+	Package(std::string name, std::string vendor, std::string version);
+	virtual ~Package() {
+	}
+	void AddPackage(Package package);
+	void AddProgram(Program program);
+
+	Program* FindProgram(const std::string& name);
+
+	Package* FindPackage(const std::string &name);
+
+	SHIPS_INLINE
+	std::string GetName() {
+		return name_;
+	}
+protected:
+	std::string name_;
+	std::string vendor_;
+	std::string version_;
+private:
+	std::map<std::string, Package> packages_;
+	std::map<std::string, Program> programs_;
+	//Package* packages_;
+};
+
+class Program {
+public:
+	Program();
+	Program(std::string name);
+	virtual ~Program() {
+	}
+	void AddKernel(cl::Kernel kernel, const std::string& name);
+
+	cl::Kernel* FindKernel(const std::string& name);SHIPS_INLINE
+	std::string GetName() {
+		return name_;
+	}
+	SHIPS_INLINE
+	void Include(const std::string& filename) {
+		includes_.push_back(filename);
+	}
+
+	int Build(const cl::Context& context);
+
+	cl::Program GetProgram() {
+		return program_;
+	}
+
+	void SetProgram(const cl::Program& program) {
+		this->program_ = program;
+	}
+protected:
+	std::string name_;
+	cl::Program program_;
+	std::vector<std::string> includes_;
+	std::map<std::string, cl::Kernel> kernels_;
+};
+
+class Kernel {
+
+};
 class DeviceManager {
 
 public:
@@ -111,28 +176,29 @@ public:
 		static DeviceManager obj;
 		return obj;
 	}
-
+	SHIPS_INLINE
+	void AddPackage(Package package) {
+		packages_.insert(std::pair<std::string, Package>(package.GetName(),
+				package));
+	}
 	SHIPS_INLINE
 	std::vector<cl::Device>& GetDefaultDevices() {
 		return devices_;
 	}
 	SHIPS_INLINE
-	cl::Device GetDefaultDevice() {
+	cl::Device& GetDefaultDevice() {
 		return devices_[0];
 	}
 	SHIPS_INLINE
-	cl::Context GetDefaultContext(){
+	cl::Context& GetDefaultContext() {
 		return contexts_[0];
 	}
 
-	SHIPS_INLINE
-	cl::Kernel GetKernel(std::string name) {
-		return kernels_[name];
-	}
-	SHIPS_INLINE
-	cl::Program GetProgram(std::string name) {
-		return programs_[name];
-	}
+	cl::Kernel* FindKernel(const std::string& name);
+
+	cl::Program* FindProgram(const std::string& name);
+
+	Package* FindPackage(const std::string& name);
 
 	SHIPS_INLINE
 	std::vector<cl::Platform>& GetPlatforms() {
@@ -140,7 +206,7 @@ public:
 	}
 
 	SHIPS_INLINE
-	cl::Platform GetPlatform(){
+	cl::Platform& GetPlatform() {
 		return platforms_[0];
 	}
 
@@ -157,12 +223,14 @@ public:
 private:
 
 	void Cleanup();
-
+	void ParsePackageConfig(const std::string& filename);
+	void ReadPackage(Package* pkg, const TiXmlHandle& root);
+	void ReadProgram(Program* pkg, const TiXmlHandle& root);
 	virtual ~DeviceManager() {
 		Cleanup();
 	}
 	SHIPS_INLINE DeviceManager() {
-		Initialize();
+		//Initialize();
 	}
 
 	DeviceManager(const DeviceManager& devie_manager) {
@@ -176,8 +244,7 @@ private:
 	std::vector<cl::Context> contexts_;
 	//cl::Context* context_;
 
-	std::map<std::string, cl::Program> programs_;
-	std::map<std::string, cl::Kernel> kernels_;
+	std::map<std::string, Package> packages_;
 
 	std::vector<std::string> program_src_paths_;
 	std::vector<std::string> program_bin_paths_;

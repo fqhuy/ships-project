@@ -27,7 +27,7 @@ void ShipsConfig::Config(const string& file_name){
 	std::string log_config_file = ships["log_config_file"];
 	log4cxx::xml::DOMConfigurator::configure(log_config_file);
 	//program source config
-	LOG4CXX_INFO(Sp::core_logger, "config program source path");
+	//LOG4CXX_INFO(Sp::core_logger, "config program source path");
 	int count = ships["program_source_paths"].getLength();
 	std::vector<std::string> program_source_paths;
 	for (int i=0;i<count;i++){
@@ -35,14 +35,14 @@ void ShipsConfig::Config(const string& file_name){
 		program_source_paths.push_back(s);
 	}
 	//program binary config
-	LOG4CXX_INFO(Sp::core_logger, "config program binary path");
+	//LOG4CXX_INFO(Sp::core_logger, "config program binary path");
 	count = ships["program_binary_paths"].getLength();
 	std::vector<std::string> program_bin_paths;
 	for (int i=0;i<count;i++){
 		std::string s = ships["program_binary_paths"][i];
 		program_bin_paths.push_back(s);
 	}
-	LOG4CXX_INFO(Sp::core_logger, "Initialize device manager");
+
 	DeviceManager::Instance().SetProgramSrcPaths(program_source_paths);
 	DeviceManager::Instance().SetProgramBinPaths(program_bin_paths);
 	DeviceManager::Instance().Initialize();

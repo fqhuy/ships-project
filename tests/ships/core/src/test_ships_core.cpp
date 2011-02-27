@@ -6,8 +6,9 @@
 #include <cppunit/TestRunner.h>
 
 #include <ships/core/core.hpp>
-#include "matrix_test.hpp"
-#include "vector_test.hpp"
+#include "device_manager_test.hpp"
+//#include "matrix_test.hpp"
+//#include "vector_test.hpp"
 //#include "pixel_test.hpp"
 //#include "config_test.hpp"
 //#include "memory_model_test.hpp"

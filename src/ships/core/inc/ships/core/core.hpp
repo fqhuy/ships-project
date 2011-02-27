@@ -9,6 +9,7 @@
 #include <stdint.h>
 #include <map>
 #include <string>
+#include <fstream>
 #include <vector>
 #include <CL/cl.hpp>
 #include <libconfig.h++>
@@ -18,7 +19,13 @@
 #include "log4cxx/propertyconfigurator.h"
 #include "log4cxx/helpers/exception.h"
 
+#include <boost/foreach.hpp>
+#include <boost/tokenizer.hpp>
+
+#include "tinyxml.h"
+
 //#include "shipsconfig.h"
+#include "util.hpp"
 #include "common.hpp"
 #include "allocator.hpp"
 #include "color.hpp"

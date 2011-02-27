@@ -1,0 +1,123 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<xs:schema elementFormDefault="qualified" targetNamespace="http://ships-project.org"
+	xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:sp="http://ships-project.org">
+
+	<xs:complexType name="programType">
+		<xs:sequence>
+			<xs:element name="kernel" type="sp:kernelType" minOccurs="1"
+				maxOccurs="unbounded">
+			</xs:element>
+			<xs:element name="include" type="xs:string" minOccurs="0"
+				maxOccurs="unbounded">
+			</xs:element>
+
+			<xs:element name="requirements">
+				<xs:complexType>
+					<xs:sequence>
+						<xs:group ref="sp:booleanExpressionGroup" minOccurs="0"></xs:group>
+					</xs:sequence>
+				</xs:complexType>
+			</xs:element>
+		</xs:sequence>
+
+		<xs:attribute name="id" type="xs:int"></xs:attribute>
+		<xs:attribute name="name" type="xs:string"></xs:attribute>
+	</xs:complexType>
+
+	<xs:complexType name="packageType">
+		<xs:sequence>
+			<xs:element name="package" type="sp:packageType" maxOccurs="unbounded" minOccurs="0"></xs:element>
+			<xs:element name="program" type="sp:programType"
+				minOccurs="0" maxOccurs="unbounded">
+			</xs:element>			
+		</xs:sequence>
+		<xs:attribute name="name" type="xs:string"></xs:attribute>
+		<xs:attribute name="version" type="xs:string"></xs:attribute>
+		<xs:attribute name="vendor" type="xs:string"></xs:attribute>
+		<xs:attribute name="created" type="xs:dateTime"></xs:attribute>
+		<xs:attribute name="modified" type="xs:dateTime"></xs:attribute>
+	</xs:complexType>
+
+	<xs:complexType name="kernelType">
+		<xs:attribute name="id" type="xs:int"></xs:attribute>
+		<xs:attribute name="name" type="xs:string"></xs:attribute>
+	</xs:complexType>
+
+	<xs:element name="package" type="sp:packageType"></xs:element>
+
+
+	<xs:simpleType name="CL_DEVICE_TYPE">
+		<xs:restriction base="xs:string">
+			<xs:enumeration value="CL_DEVICE_TYPE_CPU" />
+			<xs:enumeration value="CL_DEVICE_TYPE_GPU"></xs:enumeration>
+			<xs:enumeration value="CL_DEVICE_TYPE_ACCELERATOR"></xs:enumeration>
+			<xs:enumeration value="CL_DEVICE_TYPE_DEFAULT"></xs:enumeration>
+		</xs:restriction>
+	</xs:simpleType>
+
+
+	<xs:attributeGroup name="CommonAtt">
+		<xs:attribute name="id" type="xs:ID" />
+		<xs:attribute name="xref" />
+		<xs:attribute name="class" type="xs:NMTOKENS" />
+		<xs:attribute name="style" type="xs:string" />
+		<xs:attribute name="href" type="xs:anyURI" />
+		<xs:anyAttribute namespace="##other" processContents="skip" />
+	</xs:attributeGroup>
+
+	<xs:element name="nary-logical.class" abstract="true">
+		<xs:complexType>
+			<xs:attributeGroup ref="sp:CommonAtt" />
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="and" substitutionGroup="sp:nary-logical.class" />
+	<xs:element name="or" substitutionGroup="sp:nary-logical.class" />
+	<xs:element name="xor" substitutionGroup="sp:nary-logical.class" />
+
+	<xs:element name="unary-logical.class" abstract="true">
+		<xs:complexType>
+			<xs:attributeGroup ref="sp:CommonAtt" />
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="not" substitutionGroup="sp:unary-logical.class" />
+
+	<xs:element name="nary-reln.class" abstract="true">
+		<xs:complexType>
+			<xs:attributeGroup ref="sp:CommonAtt" />
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="eq" substitutionGroup="sp:nary-reln.class" />
+	<xs:element name="gt" substitutionGroup="sp:nary-reln.class" />
+	<xs:element name="lt" substitutionGroup="sp:nary-reln.class" />
+	<xs:element name="geq" substitutionGroup="sp:nary-reln.class" />
+	<xs:element name="leq" substitutionGroup="sp:nary-reln.class" />
+
+	<xs:element name="binary-reln.class" abstract="true" />
+	<xs:element name="neq" substitutionGroup="sp:binary-reln.class">
+		<xs:complexType>
+			<xs:attributeGroup ref="sp:CommonAtt" />
+		</xs:complexType>
+	</xs:element>
+
+	<xs:element name="binary-logical.class" abstract="true">
+		<xs:complexType>
+			<xs:attributeGroup ref="sp:CommonAtt" />
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="implies" substitutionGroup="sp:binary-logical.class" />
+	<xs:element name="equivalent" substitutionGroup="sp:binary-logical.class" />
+
+	<xs:group name="booleanExpressionGroup">
+		<xs:sequence>
+			<xs:element ref="sp:nary-logical.class"></xs:element>
+			<xs:element ref="sp:nary-reln.class"></xs:element>
+			<xs:element ref="sp:unary-logical.class"></xs:element>
+			<xs:element ref="sp:binary-logical.class"></xs:element>
+			<xs:element ref="sp:binary-reln.class"></xs:element>
+		</xs:sequence>
+	</xs:group>
+
+	<xs:group name="NewGroupDefinition">
+		<xs:sequence></xs:sequence>
+	</xs:group>
+</xs:schema>

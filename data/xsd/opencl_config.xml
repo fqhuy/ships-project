@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<sp:package xmlns:sp="http://ships-project.org"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://ships-project.org opencl_config.xsd "
+	name="ships" created="2001-12-31T12:00:00"
+	modified="2001-12-31T12:00:00" version="1.0" vendor="ships-project.org">
+	<sp:package created="2001-12-31T12:00:00"
+		modified="2001-12-31T12:00:00" name="core">
+		<sp:program name="matrix">
+			<sp:kernel name="Add" />
+			<sp:include>ships.core.matrix.add</sp:include>
+			<sp:include>ships.core.matrix.mul</sp:include>
+			<sp:requirements>
+			</sp:requirements>
+		</sp:program>
+		<sp:program name="vector">
+			<sp:kernel name="Add" />
+			<sp:requirements>
+			</sp:requirements>
+		</sp:program>
+	</sp:package>
+	<sp:package name="image"></sp:package>
+	<sp:package name="video"></sp:package>
+</sp:package>

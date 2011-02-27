@@ -5,7 +5,7 @@
  * Created on Feb 23, 2011, 9:32:30 PM
  */
 #include "vector_test.hpp"
-CPPUNIT_TEST_SUITE_REGISTRATION(VectorTest);
+//CPPUNIT_TEST_SUITE_REGISTRATION(VectorTest);
 
 VectorTest::VectorTest() {
 	//LOG4CXX_INFO(Sp::core_logger, "vector_test: creating vector...");
