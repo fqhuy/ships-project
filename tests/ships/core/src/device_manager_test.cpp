@@ -8,7 +8,7 @@
 
 #include "device_manager_test.hpp"
 
-CPPUNIT_TEST_SUITE_REGISTRATION(DeviceManagerTest);
+//CPPUNIT_TEST_SUITE_REGISTRATION(DeviceManagerTest);
 
 DeviceManagerTest::DeviceManagerTest() {
 }
@@ -25,7 +25,7 @@ void DeviceManagerTest::tearDown() {
 }
 
 void DeviceManagerTest::testFindKernel() {
-	cl::Kernel* kernel = Sp::DeviceManager::Instance().FindKernel(std::string("ships.core.vector.add"));
+	cl::Kernel* kernel = Sp::DeviceManager::Instance().FindKernel(std::string("ships.core.vector.mul"));
 	CPPUNIT_ASSERT(kernel!=NULL);
 	LOG4CXX_INFO(Sp::core_logger, "kernel ID is: " << (*kernel)());
 }

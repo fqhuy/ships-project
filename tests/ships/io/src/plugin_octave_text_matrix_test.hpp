@@ -2,6 +2,7 @@
 #define PLUGIN_OCTAVE_TEXT_MATRIX_TEST_HPP_
 
 
+
 class PluginOctaveTextMatrixTest: public CppUnit::TestFixture {
 
 CPPUNIT_TEST_SUITE( PluginOctaveTextMatrixTest );
@@ -36,5 +37,5 @@ public:
 
 };
 
-
+CPPUNIT_TEST_SUITE_REGISTRATION(PluginOctaveTextMatrixTest);
 #endif /* PLUGIN_OCTAVE_TEXT_MATRIX_TEST_HPP_ */

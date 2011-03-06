@@ -62,18 +62,24 @@ void Program::AddKernel(cl::Kernel kernel, const std::string& name) {
 	this->kernels_.insert(std::pair<std::string, cl::Kernel>(name,
 			kernel));
 }
+
 int Program::Build(const cl::Context& context) {
 	cl::Program::Sources sources;
-
+	//TODO: should I delete this after pushing it back to the vector ?
+	std::ifstream* sourceFile;
+	std::string* allCode = new std::string("");
+	std::string* sourceCode;
 	for (int i = 0; i < includes_.size(); i++) {
-		std::ifstream sourceFile(includes_[i].c_str());
-		std::string sourceCode(std::istreambuf_iterator<char>(sourceFile),
+		sourceFile = new std::ifstream(includes_[i].c_str());
+		sourceCode = new std::string(std::istreambuf_iterator<char>(*sourceFile),
 				(std::istreambuf_iterator<char>()));
-		sources.push_back(std::make_pair(sourceCode.c_str(),
-				sourceCode.length() + 1));
-		//LOG4CXX_INFO(core_logger, "added source: " << sourceCode );
+
+		allCode->append(*sourceCode);
 	}
 	int err;
+	sources.push_back(std::make_pair(allCode->c_str(),
+			allCode->length() + 1));
+
 	program_ = cl::Program(context, sources, &err);
 	if (err != CL_SUCCESS) {
 		LOG4CXX_ERROR(core_logger, "unable to create program " << name_
@@ -92,6 +98,7 @@ int Program::Build(const cl::Context& context) {
 
 	return 0;
 }
+
 cl::Kernel* Program::FindKernel(const std::string& name) {
 	std::map<std::string, cl::Kernel>::iterator it;
 
@@ -135,8 +142,6 @@ void DeviceManager::ReadProgram(Program* prg, const TiXmlHandle& root) {
 			name.append(".cl");
 			name.insert(0, "/");
 			name.insert(0, this->program_src_paths_[0]);
-
-
 			prg->Include(name);
 		}
 	}
@@ -158,7 +163,7 @@ void DeviceManager::ReadProgram(Program* prg, const TiXmlHandle& root) {
 		cl::Kernel *kernel = new cl::Kernel(prg->GetProgram(), kname, &err);
 
 		if (err != CL_SUCCESS) {
-			LOG4CXX_ERROR(core_logger,"unable to create kernel, error code is "<< err);
+			LOG4CXX_ERROR(core_logger,"unable to create kernel "<< kname <<", error code is "<< err);
 			continue;
 		}
 		//LOG4CXX_INFO(Sp::core_logger, "adding kernel " << (*kernel)() << '\n');

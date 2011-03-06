@@ -9,9 +9,7 @@
 
 namespace Sp {
 /******************** InputStreamImpl ********************/
-std::string InputStreamImpl::ReadLine(uint32_t streamsize, char delim) {
-	return NULL;
-}
+
 uint8_t InputStreamImpl::ReadUInt8() {
 	return this->ReadInt8();
 }
@@ -65,10 +63,17 @@ uint64_t InputStreamImpl::Skip(uint64_t num_bytes) {
 void InputStreamImpl::Close() {
 }
 /******************** FileInputStream ********************/
-std::string FileInputStream::ReadLine(uint32_t streamsize, char delim) {
+std::string FileInputStream::ReadLine(uint32_t streamsize, char delim) throw(IOExeption) {
 	char buff[streamsize];
-	this->file_->getline(buff, streamsize, delim);
+	try{
+		this->file_->getline(buff, streamsize, delim);
+	} catch(std::exception& e){
+		LOG4CXX_ERROR(io_logger, e.what());
+		throw IOExeption();
+	}
+
 	std::string re(buff);
+
 	return re;
 }
 

@@ -36,6 +36,7 @@ public:
 	typedef T1* Pointer;
 
 	//TODO: Need copy constructor here.
+	Vector();
 	Vector(const uint32_t& size);
 	Vector(const uint32_t& size, MemoryModel<ValueType2>* memory_model, SampleModel<ValueType1, ValueType2>* sample_model);
 	virtual ~Vector() {
@@ -53,11 +54,13 @@ public:
 	virtual void Remove(const int& index);
 	virtual SelfType Cross(const SelfType& vector);
 	virtual SelfType Mul(const SelfType& vector);
+	virtual void Init(ValueType1 value);
 	//---------- GET ----------//
 	SHIPS_INLINE
 	virtual ValueType1 Get(const int& index){
 		return sample_model_->GetSample(array_,index,0);
 	}
+
 	SHIPS_INLINE
 	virtual Array<T2>* GetArray(){
 		return array_;
@@ -67,6 +70,10 @@ public:
 		return size_;
 	}
 	//---------- GET ----------//
+	SHIPS_INLINE
+	virtual void Sort(){
+
+	}
 protected:
 	uint32_t size_;
 	Array<T2>* array_;
@@ -83,18 +90,27 @@ public:
 	typedef T1* Pointer;
 
 	HostVector();
-	HostVector(const int& size);
+
+	SHIPS_INLINE
+	HostVector(const uint32_t& size){
+		uint32_t s = size;
+		MemoryModel<T2>* mm = new HostMemoryModel<T2>(1,1);
+		Sp::SampleModel<T1,T2>* sm = new Sp::PixelInterleavedSampleModel<T1>(1,1,&s);
+		this->sample_model_ = sm;
+		this->size_ = size;
+		this->array_ = sm->CreateArray(mm);
+	}
 
 	virtual ~HostVector() {
 	}
 
-	void Set(ValueType value, const uint32_t& index);
+	//void Set(ValueType value, const uint32_t& index);
 	void Insert(const int& pos, ConstReference element);
 	void Resize(const int& size, const bool& preserve = true);
 	void Remove(const int& index);
 
 	//---------- GET ----------//
-	ValueType Get(const int& index);
+	//ValueType Get(const int& index);
 	//---------- GET ----------//
 protected:
 private:

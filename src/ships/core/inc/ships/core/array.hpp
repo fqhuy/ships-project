@@ -17,12 +17,23 @@ public:
 	typedef const T& ConstReference;
 	typedef T* Pointer;
 
-	SHIPS_INLINE Array(uint32_t size, ValueType init_value = 0) {
-		//MemoryModel<ValueType>* mm = new MemoryModel<ValueType>(2);
-		//uint32_t dims[]= {width, height};
-		//Init(2, dims, mm, init_value);
+	SHIPS_INLINE
+	Array(uint32_t size, ValueType init_value = 0) {
+		MemoryModel<ValueType>* mm = new MemoryModel<ValueType>(2);
+		uint32_t dims[]= {size,1};
+		Init(1, dims, mm, init_value);
 	}
-
+	SHIPS_INLINE
+	Array(uint32_t size, MemoryModel<ValueType>* memory_model, ValueType init_value = 0) {
+		uint32_t dims[]= {size,1};
+		Init(1, dims, memory_model, init_value);
+	}
+	SHIPS_INLINE
+	Array(const uint32_t& width, const uint32_t& height, ValueType init_value=0) {
+		MemoryModel<T>* mm = new MemoryModel<T>(2,true,true,1,READ_WRITE);
+		uint32_t dims[] = { width, height };
+		Init(2, dims, mm, true, init_value);
+	}
 	/*
 	 * Array constructor
 	 * @param num_dims the number of dimensions of the array.
@@ -30,10 +41,11 @@ public:
 	 * @param memory_model the memory model of this Array.
 	 * @param init_value the initial value of the array, default is 0.
 	 */
-	SHIPS_INLINE Array(int width, int height,
+	SHIPS_INLINE
+	Array(const uint32_t& width, const uint32_t& height,
 			MemoryModel<ValueType>* memory_model, ValueType init_value = 0) {
 		uint32_t dims[] = { width, height };
-		Init(2, dims, memory_model, init_value);
+		Init(2, dims, memory_model, true, init_value);
 	}
 	/*
 	 * Array constructor
@@ -42,15 +54,24 @@ public:
 	 * @param memory_model the memory model of this Array.
 	 * @param init_value the initial value of the array, default is 0.
 	 */
-	SHIPS_INLINE Array(int num_dims, uint32_t* dims,
+	SHIPS_INLINE
+	Array(const uint32_t&  num_dims, uint32_t* dims,
 			MemoryModel<ValueType>* memory_model, ValueType init_value = 0) {
-		Init(num_dims, dims, memory_model, init_value);
+		Init(num_dims, dims, memory_model, true, init_value);
+	}
+
+	SHIPS_INLINE
+	Array(const uint32_t&  num_dims, uint32_t* dims,
+			MemoryModel<ValueType>* memory_model, Pointer data) {
+		this->data_ = data;
+		Init(num_dims, dims, memory_model, false);
 	}
 
 	virtual ~Array() {
 		data_ = NULL;
-		delete steps_;
-		delete dims_;
+		//delete []steps_;
+		//delete []dims_;
+		delete memory_model_;
 	}
 
 	virtual void Resize(uint32_t* dims);
@@ -160,18 +181,21 @@ public:
 	virtual void Set(ValueType value, int x, int y, int z) {
 		data3d_[x][y][z] = value;
 	}
+
+	virtual std::string ToString();
 protected:
-	cl_uint* steps_;
+	//Max number of dimensions supported is 16 ^_^
+	cl_uint steps_[SP_MAX_NUM_DIMENSIONS];
 	Pointer data_;
 	Pointer* data2d_;
 	Pointer** data3d_;
 	cl_uint num_dims_;
 	cl_uint width_, height_, depth_;
-	cl_uint* dims_;
+	cl_uint dims_[SP_MAX_NUM_DIMENSIONS];
 	MemoryModel<ValueType>* memory_model_;
 
 	void Init(uint32_t num_dims, uint32_t* dims,
-			MemoryModel<ValueType>* memory_model, ValueType init_value = 0);
+			MemoryModel<ValueType>* memory_model, bool create_data = true, ValueType init_value = 0);
 
 	SHIPS_INLINE
 	bool CheckCompatability() {
@@ -193,18 +217,33 @@ public:
 	typedef T* Pointer;
 	typedef const T* ConstPointer;
 
-	SHIPS_INLINE HostArray(int num_dims, uint32_t* dims, HostMemoryModel<
+	SHIPS_INLINE
+	HostArray(const uint32_t& width, const uint32_t& height, ValueType init_value=0) {
+		MemoryModel<T>* mm = new HostMemoryModel<T>(2,1);
+		uint32_t dims[] = { width, height };
+		this->Init(2, dims, mm, true, init_value);
+	}
+
+	SHIPS_INLINE
+	HostArray(const uint32_t& width,const uint32_t& height,
+			MemoryModel<ValueType>* memory_model, ValueType init_value = 0): Super(width, height, memory_model, init_value){
+
+	}
+
+	SHIPS_INLINE
+	HostArray(const uint32_t& num_dims, uint32_t* dims, HostMemoryModel<
 			ValueType>* memory_model, ValueType init_value = 0) :
 		Super(num_dims, dims, memory_model, init_value) {
 
 	}
 
-	SHIPS_INLINE HostArray(int num_dims, uint32_t* dims, HostMemoryModel<
-			ValueType>* memory_model, ConstPointer data) //:Super (num_dims, dims, memory_model)
+	SHIPS_INLINE
+	HostArray(const uint32_t&  num_dims, uint32_t* dims, HostMemoryModel<
+			ValueType>* memory_model, Pointer data) :Super (num_dims, dims, memory_model, data)
 	{
-		this->data_ = data;
-	}
 
+	}
+	/*
 	SHIPS_INLINE
 	Super* Clone() {
 		Pointer data = new ValueType[this->GetSize()];
@@ -214,6 +253,7 @@ public:
 				this->memory_model_, hmm, data);
 		return re;
 	}
+	*/
 protected:
 
 };

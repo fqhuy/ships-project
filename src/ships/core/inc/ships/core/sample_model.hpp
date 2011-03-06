@@ -52,7 +52,7 @@ public:
 	typedef const T1& ConstReference;
 
 	virtual ~SampleModel() {
-		delete dims_;
+		//delete dims_;
 	}
 
 	SHIPS_INLINE
@@ -66,9 +66,13 @@ public:
 	}
 
 	SHIPS_INLINE
-	uint32_t* GetDims() {
+	uint32_t *GetDims() {
 		return dims_;
 	}
+	/*
+	 * @brief clone the current sample model
+	 */ 
+	virtual SampleModel<ValueType1,ValueType2>* Clone() = 0;
 	/**
 	 *
 	 */
@@ -93,8 +97,8 @@ public:
 	 * @param z z position.
 	 * @return the sample value from input array.
 	 */
-	virtual ValueType1 GetSample(Array<ValueType2>* array, int x, int y, int z,
-			int channel) =0;
+	virtual ValueType1 GetSample(Array<ValueType2>* array, const int& x, const int& y, const int& z,
+			const int& channel) =0;
 	/**
 	 * @param array the array that this model will look for a specific sample.
 	 * @param channel sample channel.
@@ -102,30 +106,30 @@ public:
 	 * @param y y position.
 	 * @return the sample value from input array.
 	 */
-	virtual ValueType1 GetSample(Array<ValueType2>* array, int x, int y,
-			int channel) =0;
+	virtual ValueType1 GetSample(Array<ValueType2>* array, const int& x, const int& y,
+			const int& channel) =0;
 	/**
 	 * @param array the array that this model will look for a specific sample.
 	 * @param channel sample channel.
 	 * @param x x position.
 	 * @return the sample value from input array.
 	 */
-	virtual ValueType1 GetSample(Array<ValueType2>* array, int x, int channel )=0;
+	virtual ValueType1 GetSample(Array<ValueType2>* array,const int& x, const int& channel )=0;
 	/**
 	 *
 	 */
-	virtual void SetSample(Array<ValueType2>* array, ValueType1 value, int x,
-			int channel) =0;
+	virtual void SetSample(Array<ValueType2>* array, ValueType1 value, const int& x,
+			const int& channel) =0;
 	/**
 	 *
 	 */
-	virtual void SetSample(Array<ValueType2>* array, ValueType1 value, int x,
-			int y, int channel) =0;
+	virtual void SetSample(Array<ValueType2>* array, ValueType1 value, const int& ,
+			const int& y, const int& channel) =0;
 	/**
 	 *
 	 */
-	virtual void SetSample(Array<ValueType2>* array, ValueType1 value, int x,
-			int y, int z, int channel)=0;
+	virtual void SetSample(Array<ValueType2>* array, ValueType1 value, const int& ,
+			const int& y, const int&  z, const int& channel)=0;
 	/**
 	 * @param array the array that this model will look for samples
 	 * @param x
@@ -133,7 +137,7 @@ public:
 	 * @param z
 	 * @return a pointer to an array of sample. size of this array is equal to the number of channels.
 	 */
-	virtual Pointer GetSamples(Array<ValueType2>* array, int x, int y, int z) {
+	virtual Pointer GetSamples(Array<ValueType2>* array, const int& x, const int& y, const int& z) {
 		Pointer re = new ValueType1[3];
 		re[0] = GetSample(array, x * this->num_channels_, y, z, 0);
 		re[1] = GetSample(array, x * this->num_channels_ + 1, y, z, 1);
@@ -141,8 +145,8 @@ public:
 		return re;
 	}
 
-	virtual void SetSamples(Array<ValueType2>* array, Pointer values, int x,
-			int y, int z) {
+	virtual void SetSamples(Array<ValueType2>* array, Pointer values, const int& x,
+			const int& y, const int& z) {
 		SetSample(array, values[0], x, y, z, 0);
 		SetSample(array, values[1], x, y, z, 1);
 		SetSample(array, values[2], x, y, z, 2);
@@ -150,12 +154,14 @@ public:
 protected:
 	uint32_t num_channels_;
 	uint32_t num_dims_;
-	uint32_t* dims_;
+	uint32_t dims_[SP_MAX_NUM_DIMENSIONS];
 
 	SHIPS_INLINE
 	SampleModel(uint32_t num_channels, uint32_t num_dims,
 			uint32_t* dims) :
-		num_channels_(num_channels), num_dims_(num_dims), dims_(dims) {
+		num_channels_(num_channels), num_dims_(num_dims) {
+		ArrayUtils::copyArray<uint32_t>(0,num_dims,dims,dims_);
+		ArrayUtils::initArray(num_dims,(uint32_t)SP_MAX_NUM_DIMENSIONS,(uint32_t)1,dims_);
 	}
 
 	SHIPS_INLINE
@@ -222,46 +228,47 @@ public:
 	 * @param memory_model memory model to create the data buffer
 	 * @return pointer to Array object
 	 */
+	SampleModel<ValueType,ValueType>* Clone();
 	Array<ValueType>* CreateArray(MemoryModel<ValueType>* memory_model);
 
 	SHIPS_INLINE
-	ValueType GetSample(Array<ValueType>* array, int x, int channel = 0) {
+	ValueType GetSample(Array<ValueType>* array, const int& x, const int& channel = 0) {
 		int index = x * (this->num_channels_) + channel;
 		return array->Get(index);
 	}
 
 	SHIPS_INLINE
-	ValueType GetSample(Array<ValueType>* array, int x, int y, int channel = 0) {
+	ValueType GetSample(Array<ValueType>* array, const int& x, const int& y, const int& channel = 0) {
 		return array->Get(x * (this->num_channels_) + channel, y);
 	}
 
 	SHIPS_INLINE
-	ValueType GetSample(Array<ValueType>* array, int x, int y, int z,
-			int channel = 0) {
+	ValueType GetSample(Array<ValueType>* array, const int& x, const int& y, const int& z,
+			const int& channel = 0) {
 		return array->Get(x * (this->num_channels_) + channel, y, z);
 	}
 	/**
 	 * @see SampleModel
 	 */
 	SHIPS_INLINE
-	void SetSample(Array<ValueType>* array, ValueType value, int x,
-			int channel = 0) {
+	void SetSample(Array<ValueType>* array, ValueType value, const int& x,
+			const int& channel = 0) {
 		array->Set(value,x * (this->num_channels_) + channel);
 	}
 	/**
 	 *
 	 */
 	SHIPS_INLINE
-	void SetSample(Array<ValueType>* array, ValueType value, int x, int y,
-			int channel = 0) {
+	void SetSample(Array<ValueType>* array, ValueType value, const int& x, const int& y,
+			const int& channel = 0) {
 		array->Set(value,x * (this->num_channels_) + channel,y);
 	}
 	/**
 	 *
 	 */
 	SHIPS_INLINE
-	void SetSample(Array<ValueType>* array, ValueType value, int x, int y,
-			int z, int channel = 0) {
+	void SetSample(Array<ValueType>* array, ValueType value, const int& x, const int& y,
+			const int& z, const int& channel = 0) {
 		array->Set(value,x * (this->num_channels_) + channel,y,z);
 	}
 private:

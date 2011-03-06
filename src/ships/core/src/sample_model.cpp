@@ -5,10 +5,13 @@
  *      Author: fqhuy
  */
 #include <ships/core/core.hpp>
+#include <tiff.h>
 
 namespace Sp {
 #define INSTANTIATE_PIXELINTERLEAVEDSAMPLEMODEL(T) \
-		template Array<T>* PixelInterleavedSampleModel<T>::CreateArray(MemoryModel<T>* memory_model);
+		template Array<T>* PixelInterleavedSampleModel<T>::CreateArray(MemoryModel<T>* memory_model); \
+		template SampleModel<T,T>* PixelInterleavedSampleModel<T>::Clone();
+		
 INSTANTIATE_PIXELINTERLEAVEDSAMPLEMODEL(int8_t)
 INSTANTIATE_PIXELINTERLEAVEDSAMPLEMODEL(uint8_t)
 INSTANTIATE_PIXELINTERLEAVEDSAMPLEMODEL(int16_t)
@@ -19,6 +22,13 @@ INSTANTIATE_PIXELINTERLEAVEDSAMPLEMODEL(int64_t)
 INSTANTIATE_PIXELINTERLEAVEDSAMPLEMODEL(uint64_t)
 INSTANTIATE_PIXELINTERLEAVEDSAMPLEMODEL(float)
 INSTANTIATE_PIXELINTERLEAVEDSAMPLEMODEL(double)
+INSTANTIATE_PIXELINTERLEAVEDSAMPLEMODEL(bool)
+
+template<class T> SampleModel<T,T>* PixelInterleavedSampleModel<T>::Clone(){
+  uint32_t dims[SP_MAX_NUM_DIMENSIONS];
+  ArrayUtils::copyArray<uint32_t>(0,SP_MAX_NUM_DIMENSIONS,this->dims_,dims);
+  SampleModel<T,T>* re  = new PixelInterleavedSampleModel<T>(this->num_channels_,this->num_dims_,dims);
+}
 
 template<class T> Array<T>* PixelInterleavedSampleModel<T>::CreateArray(
 		MemoryModel<T>* memory_model) {
@@ -26,7 +36,7 @@ template<class T> Array<T>* PixelInterleavedSampleModel<T>::CreateArray(
 	if (memory_model->GetNumDims() == 1) {
 		uint32_t size = this->CalculateBufferSize(memory_model->GetAlignment());
 
-		Array<T>* re =  new Array<T> (1, &size, memory_model, 0);
+		Array<T>* re =  new Array<T> (1, &size, memory_model, (T)0);
 		//fill the padded portion by 0
 		if(size > this->dims_[0]){
 			for(int i=this->dims_[0];i<size;i++)
@@ -58,7 +68,7 @@ template<class T> Array<T>* PixelInterleavedSampleModel<T>::CreateArray(
 
 		memory_model->SetImageFormat(imf);
 
-		return new Array<T> (this->num_dims_, this->dims_, memory_model, 0);
+		return new Array<T> (this->num_dims_, this->dims_, memory_model, (T) 0);
 	}
 
 	return NULL;

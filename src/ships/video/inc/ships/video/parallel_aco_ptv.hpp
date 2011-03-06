@@ -11,17 +11,18 @@
 namespace Sp{
 class ParallelACOPTVEstimator: public MotionEstimator {
 public:
+	virtual ~ParallelACOPTVEstimator(){}
 	SHIPS_INLINE
-	ParallelACOPTVEstimator(const uint32_t& num_frames, Matrix<float,float>* frames): Super(num_frames,frames){
+	ParallelACOPTVEstimator(): Super(){
 	}
 
-	Matrix<float,float>* Estimate();
+	Matrix<int,int>* Estimate();
 private:
 	Vector<int,int>* clusters_;
 	typedef MotionEstimator Super;
 
 	void Cluster();
-
+	void Distance();
 };
 }
 

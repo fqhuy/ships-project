@@ -11,10 +11,13 @@
 #include <cppunit/TestResult.h>
 #include <cppunit/TestResultCollector.h>
 #include <cppunit/TestRunner.h>
+#include <cppunit/extensions/HelperMacros.h>
 
-#include <ships/core/core.hpp>
+//#include <ships/core/core.hpp>
 #include <ships/io/io.hpp>
 #include <ships/video/video.hpp>
+#include "aco_ptv_test.hpp"
+#include "parallel_aco_ptv_test.hpp"
 
 int main(int argc, char **argv) {
 	Sp::ShipsConfig::Instance().Config();

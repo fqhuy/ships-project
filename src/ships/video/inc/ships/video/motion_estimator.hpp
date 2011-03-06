@@ -14,20 +14,22 @@ enum MotionEstimatorTypes {
 };
 class MotionEstimator {
 public:
+	virtual ~MotionEstimator(){}
+	virtual Matrix<int,int>* Estimate()=0;
 
-	virtual Matrix<float, float>* Estimate()=0;
-
-	virtual void AddFrame(Matrix<float, float>* matrix)=0;
-	virtual void RemoveFrame(const uint32_t& index)=0;
+	virtual void AddFrame(Matrix<float, float>* matrix){
+		frames_.push_back(matrix);
+	}
+	virtual void RemoveFrame(const uint32_t& index){
+		//TODO: unimplemented
+		//frames_.erase(index);
+	}
 protected:
 	SHIPS_INLINE
-	MotionEstimator(const uint32_t& num_frames, Matrix<float,
-			float>* frames) :
-		num_frames_(num_frames), frames_(frames) {
-	}
+	MotionEstimator(){}
 	MotionEstimatorTypes type_;
-	uint32_t num_frames_;
-	Matrix<float, float>* frames_;
+
+	std::vector<Matrix<float, float>* > frames_;
 };
 }
 

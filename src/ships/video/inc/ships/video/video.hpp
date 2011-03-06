@@ -3,6 +3,7 @@
 
 #include <ships/core/core.hpp>
 #include "motion_estimator.hpp"
+#include "aco_ptv.hpp"
 #include "parallel_aco_ptv.hpp"
 
 namespace Sp{

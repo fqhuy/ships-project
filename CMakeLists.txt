@@ -353,7 +353,8 @@ endif()
 # In case of Makefiles if the user does not setup CMAKE_BUILD_TYPE, assume it's Release:
 if (${CMAKE_GENERATOR} MATCHES ".*Makefiles")
     if("${CMAKE_BUILD_TYPE}" STREQUAL "")
-        set(CMAKE_BUILD_TYPE Release)
+		#currently set it to Debug
+        set(CMAKE_BUILD_TYPE Debug)
     endif()
 endif()
 

@@ -14,7 +14,7 @@ class InputStream{
 public:
 	virtual ~InputStream(){}
 
-	virtual std::string ReadLine(uint32_t streamsize, char delim='\n')=0;
+	virtual std::string ReadLine(uint32_t streamsize, char delim='\n') throw (Sp::IOExeption) =0;
 
 	virtual int8_t ReadInt8()=0;
 	virtual int32_t ReadInt8(int8_t* array, int32_t offset, uint32_t length)=0;
@@ -46,7 +46,7 @@ class InputStreamImpl: public InputStream {
 public:
 	virtual ~InputStreamImpl(){}
 
-	virtual std::string ReadLine(uint32_t streamsize, char delim='\n')=0;;
+	virtual std::string ReadLine(uint32_t streamsize, char delim='\n') throw (Sp::IOExeption) =0;
 	virtual int8_t ReadInt8()=0;
 	virtual int32_t ReadInt8(int8_t* array, int32_t offset, uint32_t length)=0;
 
@@ -80,9 +80,9 @@ public:
 	FileInputStream(const std::string& file_name);
 	virtual ~FileInputStream(){
 		Close();
-		//delete file_;
+		delete file_;
 	}
-	virtual std::string ReadLine(uint32_t streamsize, char delim='\n');
+	std::string ReadLine(uint32_t streamsize, char delim='\n') throw (Sp::IOExeption);
 	virtual int8_t ReadInt8();
 	virtual int32_t ReadInt8(int8_t* array, int32_t offset, uint32_t length);
 	virtual void Close();

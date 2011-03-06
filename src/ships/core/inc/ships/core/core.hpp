@@ -1,15 +1,20 @@
 #ifndef __SHIPS_CORE_HPP__
 #define __SHIPS_CORE_HPP__
 
+#include <sys/stat.h>
+#include <sys/types.h>
+#include <sys/time.h>
 #include <limits.h>
 #include <algorithm>
 #include <cmath>
 #include <cstring>
 #include <cstdlib>
+#include <sstream>
 #include <stdint.h>
 #include <map>
 #include <string>
 #include <fstream>
+#include <exception>
 #include <vector>
 #include <CL/cl.hpp>
 #include <libconfig.h++>
@@ -21,10 +26,13 @@
 
 #include <boost/foreach.hpp>
 #include <boost/tokenizer.hpp>
+#include <boost/scoped_array.hpp>
+#include <boost/scoped_ptr.hpp>
 
 #include "tinyxml.h"
 
 //#include "shipsconfig.h"
+#include "exceptions.hpp"
 #include "util.hpp"
 #include "common.hpp"
 #include "allocator.hpp"

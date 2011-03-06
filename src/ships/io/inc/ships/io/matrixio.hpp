@@ -48,9 +48,20 @@ public:
 		return *input_stream_;
 	}
 protected:
-	InputStream* input_stream_;
+	InputStream* input_stream_ ;
 	uint32_t width_;
 	uint32_t height_;
+
+	MatrixReader(){
+		this->input_stream_ = NULL;
+		width_ = 0;
+		height_ = 0;
+	}
+
+	virtual ~MatrixReader() {
+		//if(input_stream_)
+		//	delete input_stream_;
+	}
 };
 
 class MatrixReaderWriterPlugin: public PluginBase {

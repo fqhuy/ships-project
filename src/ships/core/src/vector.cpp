@@ -23,13 +23,21 @@
 namespace Sp {
 #define INSTANTIATE_VECTOR(T1, T2) \
 	template class Vector<T1, T2>; \
+	template Vector<T1, T2>::Vector(); \
 	template Vector<T1, T2>::Vector(const uint32_t& size); \
 	template Vector<T1, T2>::Vector(const uint32_t& size, MemoryModel<T2>* memory_model, SampleModel<T1, T2>* sample_model); \
 	template void Vector<T1, T2>::Resize(const uint32_t& size, const bool& preserve ); \
 	template void Vector<T1, T2>::Insert(const int& pos, const T1& element); \
 	template void Vector<T1, T2>::Remove(const int& index); \
 	template Vector<T1, T2> Vector<T1, T2>::Cross(const Vector<T1, T2>& vector); \
-	template Vector<T1, T2> Vector<T1, T2>::Mul(const Vector<T1, T2>& vector);
+	template Vector<T1, T2> Vector<T1, T2>::Mul(const Vector<T1, T2>& vector); \
+	template void Vector<T1, T2>::Init(T1 value);
+
+#define INSTANTIATE_HOST_VECTOR(T1, T2) \
+	template void HostVector<T1, T2>::Insert(const int& pos, const T1& element); \
+	template void HostVector<T1, T2>::Resize(const int& size, const bool& preserve = true); \
+	template void HostVector<T1, T2>::Remove(const int& index);
+
 INSTANTIATE_VECTOR(int8_t,int8_t)
 INSTANTIATE_VECTOR(int16_t,int16_t)
 INSTANTIATE_VECTOR(int32_t,int32_t)
@@ -40,6 +48,23 @@ INSTANTIATE_VECTOR(uint32_t,uint32_t)
 INSTANTIATE_VECTOR(uint64_t,uint64_t)
 INSTANTIATE_VECTOR(float,float)
 INSTANTIATE_VECTOR(double,double)
+INSTANTIATE_VECTOR(bool,bool)
+
+INSTANTIATE_HOST_VECTOR(int8_t,int8_t)
+INSTANTIATE_HOST_VECTOR(int16_t,int16_t)
+INSTANTIATE_HOST_VECTOR(int32_t,int32_t)
+INSTANTIATE_HOST_VECTOR(int64_t,int64_t)
+INSTANTIATE_HOST_VECTOR(uint8_t,uint8_t)
+INSTANTIATE_HOST_VECTOR(uint16_t,uint16_t)
+INSTANTIATE_HOST_VECTOR(uint32_t,uint32_t)
+INSTANTIATE_HOST_VECTOR(uint64_t,uint64_t)
+INSTANTIATE_HOST_VECTOR(float,float)
+INSTANTIATE_HOST_VECTOR(double,double)
+INSTANTIATE_HOST_VECTOR(bool,bool)
+
+template<class T1, class T2> Vector<T1, T2>::Vector(){
+
+}
 
 template<class T1, class T2> Vector<T1, T2>::Vector(const uint32_t& size) {
 	uint32_t s = size;
@@ -74,6 +99,22 @@ template<class T1, class T2> Vector<T1, T2> Vector<T1, T2>::Cross(const Vector<
 }
 template<class T1, class T2> Vector<T1, T2> Vector<T1, T2>::Mul(const Vector<
 		T1, T2>& vector){
+
+}
+
+template<class T1, class T2> void Vector<T1, T2>::Init(T1 value){
+	for(int i=0;i<this->size_;i++){
+		this->Set(value,i);
+	}
+}
+
+template<class T1, class T2> void HostVector<T1, T2>::Insert(const int& pos, const T1& element){
+
+}
+template<class T1, class T2> void HostVector<T1, T2>::Resize(const int& size, const bool& preserve){
+
+}
+template<class T1, class T2> void HostVector<T1, T2>::Remove(const int& index){
 
 }
 }

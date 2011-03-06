@@ -7,6 +7,25 @@
 
 #ifndef UTIL_HPP_
 #define UTIL_HPP_
+namespace Sp {
+
+class Random {
+public:
+	Random(){
+		srand(time(NULL));
+	}
+	Random(int64_t seed): seed_(seed){}
+
+	virtual ~Random(){}
+
+	template<class T> T Next(T min, T max);
+
+	void SetSeed(int64_t seed){
+		seed_ = seed;
+	}
+private:
+	int64_t seed_;
+};
 
 class StringUtils {
 public:
@@ -22,4 +41,24 @@ public:
 	} ///:~
 };
 
+class ArrayUtils {
+public:
+	template<class T> static void copyArray(uint32_t start, uint32_t end,
+			T* from, T* to) {
+		for (int i = start; i < end; i++)
+			to[i] = from[i];
+	}
+
+	template<class T> static void initArray(uint32_t start, uint32_t end,
+			T value, T* array) {
+		for (int i = start; i < end; i++)
+			array[i] = value;
+	}
+};
+
+class Timer {
+public:
+	static double deltaT(int iCounterID=0) ;
+};
+}
 #endif /* UTIL_HPP_ */

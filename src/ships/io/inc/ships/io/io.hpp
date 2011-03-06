@@ -12,6 +12,7 @@
 
 #include "ships/core/core.hpp"
 
+#include "exceptions.hpp"
 #include "plugin_manager.hpp"
 #include "imageio.hpp"
 #include "iostream.hpp"

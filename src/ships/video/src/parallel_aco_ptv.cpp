@@ -2,7 +2,7 @@
 
 namespace Sp{
 
-Matrix<float,float>* ParallelACOPTVEstimator::Estimate(){
-
+Matrix<int,int>* ParallelACOPTVEstimator::Estimate(){
+	return NULL;
 }
 }

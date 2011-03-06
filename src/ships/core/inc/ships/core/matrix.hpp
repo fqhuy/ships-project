@@ -18,6 +18,7 @@ public:
 	typedef T1* Pointer;
 	typedef Matrix<T1, T2> SelfType;
 	Matrix();
+	Matrix(Array<T2>* array, SampleModel<T1,T2>* sample_model);
 	/**
 	 * Matrix convenient constructor
 	 * @param width ..
@@ -36,11 +37,25 @@ public:
 			ValueType2>* memory_model,
 			SampleModel<ValueType1, ValueType2>* sample_model);
 	virtual ~Matrix() {
-		delete array_;
-		delete sample_model_;
+		if(array_)
+			delete array_;
+		if(sample_model_)
+			delete sample_model_;
 	}
-	virtual ValueType1 Get(int x, int y);
-	virtual void Set(ValueType1 value, int x, int y);
+	virtual ValueType1 Get(const int& x, const int& y);
+	virtual void Set(ValueType1 value, const int& x, const int& y);
+	/*
+	 * @brief this function quickly fill the matrix with zeros.
+	 */
+	virtual void Zeros();
+	/*
+	 * @brief this function init this matrix with the initial value from value parameter.
+	 */
+	virtual void Init(ValueType1 value);
+	/*
+	 * @brief clone an exactly the same matrix with different memory location.
+	 */
+	virtual Matrix<ValueType1,ValueType2>* Clone();
 
 	virtual uint32_t GetWidth();
 
@@ -58,6 +73,8 @@ public:
 	virtual SelfType& Multiply(const SelfType& matrix);
 	virtual SelfType& Multiply(ConstReference value);
 	virtual ValueType1 Det();
+
+	virtual std::string ToString();
 protected:
 	uint32_t width_;
 	uint32_t height_;
@@ -68,7 +85,32 @@ private:
 
 template<class T1, class T2> class HostMatrix: public Matrix<T1, T2> {
 public:
+	typedef T1 ValueType1;
+	typedef T2 ValueType2;
+	typedef T1& Reference;
+	typedef const T1& ConstReference;
+	typedef T1* Pointer;
+	typedef HostMatrix<T1, T2> SelfType;
+	typedef Matrix<T1, T2> Super;
+	SHIPS_INLINE
+	HostMatrix(HostArray<T2>* array, SampleModel<T1,T2>* sample_model) : Super(array, sample_model){
 
+	}
+
+	HostMatrix(const uint32_t& width, const uint32_t& height);
+
+	SHIPS_INLINE
+	HostMatrix(const uint32_t& width, const uint32_t& height, HostMemoryModel<
+			ValueType2>* memory_model,
+			SampleModel<ValueType1, ValueType2>* sample_model) :
+		Super(width, height, memory_model, sample_model) {
+	}
+
+	virtual ~HostMatrix(){
+
+	}
+
+	Super* Clone();
 protected:
 
 private:
@@ -84,13 +126,18 @@ public:
 	typedef T1* Pointer;
 	typedef DeviceMatrix<T1, T2> SelfType;
 	DeviceMatrix();
+	DeviceMatrix(HostArray<T2>* array, SampleModel<T1,T2>* sample_model) : Super(array, sample_model){
+	}
 	DeviceMatrix(const uint32_t& width, const uint32_t& height);
 	DeviceMatrix(const uint32_t& width, const uint32_t& height, MemoryModel<
 			ValueType2>* memory_model,
-			SampleModel<ValueType1, ValueType2>* sample_model): Super(width,height,memory_model,sample_model){}
-	virtual ~DeviceMatrix(){}
+			SampleModel<ValueType1, ValueType2>* sample_model) :
+		Super(width, height, memory_model, sample_model) {
+	}
+	virtual ~DeviceMatrix() {
+	}
 private:
-	typedef Matrix<T1,T2> Super;
+	typedef Matrix<T1, T2> Super;
 };
 
 }

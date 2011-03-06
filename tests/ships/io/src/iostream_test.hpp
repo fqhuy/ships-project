@@ -9,6 +9,7 @@
 #define IOSTREAM_TEST_HPP_
 
 
+
 class FileInputStreamTest: public CppUnit::TestFixture {
 
 CPPUNIT_TEST_SUITE( FileInputStreamTest );
@@ -66,5 +67,5 @@ public:
 
 };
 
-
+CPPUNIT_TEST_SUITE_REGISTRATION(FileInputStreamTest);
 #endif /* IOSTREAM_TEST_HPP_ */
