@@ -16,10 +16,6 @@ Matrix<int, int>* ACOPTVEstimator::Estimate() {
 	if (this->f0_->GetHeight() != this->f1_->GetHeight())
 		return NULL;
 	/*-----------------------------Initialize matrices------------------------------------------------*/
-	//this->tau_ = new HostMatrix<float, float> (this->num_particles_,
-	//		this->num_particles_);
-	//this->tau_->Init(this->tau0_);
-
 	this->N_ = new HostVector<bool, bool> (this->num_particles_);
 	this->N_->Init(true);
 	/*-----------------------------Measure distances between particles--------------------------------*/
@@ -45,18 +41,17 @@ Matrix<int, int>* ACOPTVEstimator::Estimate() {
 
 float ACOPTVEstimator::RelaxationLength(const int& p0, const int& p1) {
 	float length = 0;
-	float dx1, dx2, dy1, dy2, rx1, rx2, ry1, ry2, min;
+	float dx1, dx2, dy1, dy2, rx1, rx2, ry1, ry2, min, dx2x1, dy2y1;
 	int r1, r2, temp;
 
+	//location of central particles.
 	dx1 = this->f0_->Get(p0, 0);
 	dy1 = this->f0_->Get(p0, 1);
 	dx2 = this->f1_->Get(p1, 0);
 	dy2 = this->f1_->Get(p1, 1);
-
+	dx2x1 = dx2 - dx1;
+	dy2y1 = dy2 - dy1;
 	for (int i = 0; i < this->cluster_size_; i++) {
-		//location of central particles.
-
-
 		//get the ID of (i+1)-th particle in the cluster 0.
 		r1 = this->clusters0_->Get(p0, i + 1);
 		rx1 = this->f0_->Get(r1, 0);
@@ -73,15 +68,15 @@ float ACOPTVEstimator::RelaxationLength(const int& p0, const int& p1) {
 		}
 		rx2 = this->f1_->Get(r2, 0);
 		ry2 = this->f1_->Get(r2, 1);
-
-		length += (dx2 + rx1 - dx1 - rx2) * (dx2 + rx1 - dx1 - rx2) + (dy2
-				+ ry1 - dy1 - ry2) * (dy2 + ry1 - dy1 - ry2);
+		//temporarily.
+		//length =
+		length += sqrt((dx2 + rx1 - dx1 - rx2) * (dx2 + rx1 - dx1 - rx2)+ (dy2 + ry1 - dy1 - ry2) * (dy2 + ry1 - dy1 - ry2));
 	}
 
 	return length;
 }
 
-int ACOPTVEstimator::Next(int current_pos, float* probability) {
+int ACOPTVEstimator::Next(int current_pos, float* probability, bool relaxation) {
 	float prob = 1, eta = 0, denominator = 1;
 	int selected = -1, cup;
 	//finding Eta
@@ -89,9 +84,12 @@ int ACOPTVEstimator::Next(int current_pos, float* probability) {
 	for (int i = 0; i < this->num_particles_; i++) {
 		if (N_->Get(i) == true) {
 			//currently eta is calculated as reciprocal of the distance between two particles.
-			eta = 1 / this->cf0f1_->Get(current_pos, i);
+			//eta = 1 / this->cf0f1_->Get(current_pos, i);
 			// comment out bellow line to use relaxation length. usually, we use conventional length for the 1st iteration. ***
-			//eta = 1 / this->RelaxationLength(current_pos, i);
+			if (relaxation)
+				eta = 1 / this->RelaxationLength(current_pos, i);
+			else
+				eta = 1 / this->cf0f1_->Get(current_pos, i);
 
 			denominator += (pow(this->tau_->Get(current_pos, i), this->alpha_)
 					* pow(eta, this->beta_));
@@ -100,11 +98,16 @@ int ACOPTVEstimator::Next(int current_pos, float* probability) {
 
 	//loop through all unvisited particles in second frame to find one with highest probability.
 	float max = 0, tauij;
+
 	//this loop can be speed up using the ordered matrix clusters01_.
-	for (int i = 0; i < this->cluster_size_/*this->num_particles_*/; i++) {
-		cup = this->clusters01_->Get(current_pos, i);
+	for (int i = 0; i < /* this->cluster_size_*/this->num_particles_; i++) {
+		//cup = this->clusters01_->Get(current_pos, i);
+		cup = i;
 		if (N_->Get(cup) == true) {
-			eta = 1 / this->cf0f1_->Get(current_pos, cup);
+			if (relaxation)
+				eta = 1 / this->RelaxationLength(current_pos, cup);
+			else
+				eta = 1 / this->cf0f1_->Get(current_pos, cup);
 			//temporarily
 			tauij = this->tau_->Get(current_pos, cup);
 			prob = (pow(tauij, this->alpha_) * pow(eta, this->beta_))
@@ -114,12 +117,15 @@ int ACOPTVEstimator::Next(int current_pos, float* probability) {
 				selected = cup;
 			}
 		}
+
 	}
 	if (max == 0) {
 		LOG4CXX_WARN(Sp::video_logger, "Can not find any sufficient particle, consider changing the number of particles to look at..");
 		return -1;
 	}
-
+	//if(selected!=current_pos){
+	//	LOG4CXX_INFO(Sp::video_logger, "wrong pair!");
+	//}
 	//if probability is not NULL, set the value to prob
 	if (probability != NULL)
 		(*probability) = max;
@@ -128,16 +134,18 @@ int ACOPTVEstimator::Next(int current_pos, float* probability) {
 
 void ACOPTVEstimator::Loop() {
 	Random rd;
-	int i, j, k, next;
-	float tau, delta_tau, l, Lk, bestLk = INT_MAX;
+	int i, j, k, h, next;
+	float tau, delta_tau, l, Lk, bestLk = INT_MAX, lbestLk;
 	//final result
-	int *rf0, *rf1;
+	int *rf0, *rf1, *lrf0, *lrf1;
 
 	int np = this->num_particles_;
 	int na = this->num_ants_;
 	int nl = this->num_loops_;
 
 	for (i = 0; i < nl; i++) { //for nl number of loops.
+		rd.SRand();
+		this->tau_->Init(this->tau0_);
 		//Tk0[ant][particle id]
 		int Tk0[na][np];
 		int Tk1[na][np];
@@ -150,7 +158,7 @@ void ACOPTVEstimator::Loop() {
 
 			//randomize the itinerary of the ants by randomly exchanging values of elements.
 			int temp, a, b;
-			for (k = 0; k < np / 2; k++) { //for every particle
+			for (k = 0; k < np; k++) { //for every particle *****
 				a = rd.Next<int> (0, np - 1);
 				b = rd.Next<int> (0, np - 1);
 				temp = Tk0[j][a];
@@ -159,7 +167,11 @@ void ACOPTVEstimator::Loop() {
 			}
 
 			for (k = 0; k < np; k++) { //for every particle
-				next = this->Next(Tk0[j][k]);
+				if (i == 0)
+					next = this->Next(Tk0[j][k], NULL, false);
+				else
+					next = this->Next(Tk0[j][k], NULL, true);
+
 				if (next == -1) {
 					break;
 				}
@@ -170,30 +182,56 @@ void ACOPTVEstimator::Loop() {
 			}
 		}
 
+		lbestLk = INT_MAX;
+		for (k = 0; k < np; k++)
+			for (h = 0; h < np; h++) {
+				tau = this->tau_->Get(k, h);
+				this->tau_->Set((1 - this->rho_) * tau, k, h);
+			}
 		//Update Tau matrix for every ant.
 		for (j = 0; j < na; j++) {
+			Lk = 0;
+			//delta_tau = 0;
 			//Find Lk
 			for (k = 0; k < np; k++)
 				Lk += this->cf0f1_->Get(Tk0[j][k], Tk1[j][k]);
 			// comment out to use relaxation length.
-			//Lk = this->SumRelaxationLengths(Tk0[j], Tk1[j]);
+			//Lk += this->RelaxationLength(Tk0[j][k], Tk1[j][k]);
 
 			if (Lk < bestLk) {
 				bestLk = Lk;
 				rf0 = Tk0[j];
 				rf1 = Tk1[j];
 			}
+			/*
+			 if (Lk < lbestLk) {
+			 lbestLk = Lk;
+			 lrf0 = Tk0[j];
+			 lrf1 = Tk1[j];
+			 }
+			 */
 			//find delta tau
 			delta_tau = 1 / Lk;
 			//update pheromone on each portion
+
 			for (k = 0; k < np; k++) {
 				tau = this->tau_->Get(Tk0[j][k], Tk1[j][k]);
-				this->tau_->Set((1 - this->rho_) * tau + delta_tau, Tk0[j][k],
-						Tk1[j][k]);
+				this->tau_->Set(tau + delta_tau, Tk0[j][k], Tk1[j][k]);
 			}
-		}
 
+		}
+		//update pheromone on each portion
+		/*
+		 delta_tau = 1 / lbestLk;
+		 for (k = 0; k < np; k++) {
+		 tau = this->tau_->Get(lrf0[k], lrf1[k]);
+		 this->tau_->Set(tau + delta_tau, lrf0[k], lrf1[k]);
+		 }
+		 */
 		if (i == (nl - 1)) {
+			//for (k = 0; k < np ; k++) {
+			//	LOG4CXX_INFO(Sp::core_logger, Tk0[0][k]);
+			//}
 			this->result_ = new HostMatrix<int, int> (2, np);
 			for (i = 0; i < np; i++) {
 				this->result_->Set(rf0[i], i, 0);
@@ -327,7 +365,7 @@ void ACOPTVEstimator::Cluster() {
 
 	this->Sort(this->cf0_, this->clusters0_);
 	this->Sort(this->cf1_, this->clusters1_);
-	this->Sort(this->cf0f1_, this->clusters01_);
+	//this->Sort(this->cf0f1_, this->clusters01_);
 
 	//LOG4CXX_INFO(Sp::video_logger,clusters0_->ToString());
 	//LOG4CXX_INFO(Sp::video_logger,clusters1_->ToString());

@@ -20,6 +20,9 @@ public:
 
 	template<class T> T Next(T min, T max);
 
+	void SRand(){
+		srand(time(NULL));
+	}
 	void SetSeed(int64_t seed){
 		seed_ = seed;
 	}
@@ -53,6 +56,14 @@ public:
 			T value, T* array) {
 		for (int i = start; i < end; i++)
 			array[i] = value;
+	}
+
+	template<class T> static std::string ToString(T* array, const uint32_t& size){
+		std::ostringstream oss;
+		for(int i=0;i<size;i++)
+			oss << array[i] << "\t";
+		oss << "\n";
+		return oss.str();
 	}
 };
 

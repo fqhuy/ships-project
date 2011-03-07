@@ -71,7 +71,7 @@ public:
 	 * @param probability return the probability of traveling from current node to selected node
 	 * @return the selected node.
 	 */
-	int Next(int current_pos, float* probability = NULL);
+	int Next(int current_pos, float* probability, bool relaxation);
 	/*
 	 * @brief main loop
 	 */
@@ -101,7 +101,12 @@ public:
 
 	SHIPS_INLINE
 	float Distance(float x1, float y1, float x2, float y2) {
-		return (x1 - x2) * (x1 - x2) + (y1 - y2) * (y1 - y2);
+		return sqrt((x1 - x2) * (x1 - x2) + (y1 - y2) * (y1 - y2));
+	}
+
+	SHIPS_INLINE
+	Matrix<float,float>* Cf0f1(){
+		return cf0f1_;
 	}
 private:
 	/*
