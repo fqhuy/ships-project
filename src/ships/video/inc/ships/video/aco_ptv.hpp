@@ -15,10 +15,10 @@ public:
 
 	}
 	SHIPS_INLINE ACOPTVEstimator(float alpha, float beta, float rho,
-			float tau0, int cluster_size, int num_particles, int num_ants,
+			float tau0, int cluster_size, int cluster_max, int num_particles, int num_ants,
 			int num_loops) :
 		alpha_(alpha), beta_(beta), rho_(rho), tau0_(tau0), cluster_size_(
-				cluster_size), num_particles_(num_particles), num_loops_(
+				cluster_size), cluster_max_(cluster_max), num_particles_(num_particles), num_loops_(
 				num_loops), num_ants_(num_ants), f0_(NULL), f1_(NULL), cf0_(
 				NULL), cf1_(NULL), cf0f1_(NULL), tau_(NULL), N_(NULL),
 				clusters0_(NULL), clusters1_(NULL), clusters01_(NULL), result_(NULL), Super() {
@@ -87,7 +87,7 @@ public:
 	 * @return the matrix represents distances between particles from f0 and f1
 	 */
 	Matrix<float, float>* Distances(Matrix<float, float>* f0, Matrix<float,
-			float>* f1);
+			float>* f1, bool relaxation = false);
 	/*
 	 * @brief this function sort the elements in the same row increasingly.
 	 * @param matrix the matrix to sort.
@@ -107,6 +107,11 @@ public:
 	SHIPS_INLINE
 	Matrix<float,float>* Cf0f1(){
 		return cf0f1_;
+	}
+
+	SHIPS_INLINE
+	Matrix<int,int>* Clusters01(){
+		return clusters01_;
 	}
 private:
 	/*
@@ -128,9 +133,9 @@ private:
 	 * result_ num_particles_ x 2 matrix. each column is a list of particle id.
 	 */
 	Matrix<int, int>* clusters0_, *clusters1_, *clusters01_, *result_;
-
+	Matrix<float, float> *rcf0f1_; //for test purspose
 	float alpha_, beta_, rho_, tau0_;
-	int num_ants_, num_particles_, num_loops_, cluster_size_;
+	int num_ants_, num_particles_, num_loops_, cluster_size_, cluster_max_;
 	typedef MotionEstimator Super;
 };
 }
