@@ -41,11 +41,13 @@ private:
 	float tau0;
 	int cluster_size;
 	int cluster_max;
+	int cluster01_max;
 	int num_particles;
 	int num_ants;
 	int num_loops;
 
 	int zoom;
+	int move;
 public:
 	ACOPTVEstimatorTest() :
 		frame0_(NULL), frame1_(NULL), result_(NULL), iresult_(NULL), est_(NULL) {
@@ -71,9 +73,11 @@ public:
 		rho = ships["rho"];
 		cluster_size = ships["cluster_size"]; //4 ********
 		cluster_max = ships["cluster_max"];
+		cluster01_max = ships["cluster01_max"];
 		tau0 = ships["tau0"];
 		zoom = ships["zoom"];
-
+		move = ships["move"];
+		move*= zoom;
 	}
 	virtual ~ACOPTVEstimatorTest() {
 		if (frame0_)
@@ -99,7 +103,7 @@ public:
 
 		reader_.ReadAsFloatMatrix(file1_, frame1_);
 
-		est_ = new Sp::ACOPTVEstimator(alpha, beta, rho, tau0, cluster_size, cluster_max,
+		est_ = new Sp::ACOPTVEstimator(alpha, beta, rho, tau0, cluster_size, cluster_max, cluster01_max,
 				num_particles, num_ants, num_loops);
 
 
@@ -115,12 +119,21 @@ public:
 
 		if(test == "testCluster")
 			testCluster();
+		else if(test == "testDrawCluster"){
+			int a = ships["a"];
+			int b = ships["b"];
+			testDrawCluster(a,b);
+		}
 		else if( test == "testEstimate")
 			testEstimate();
 		else if( test == "testEstimateN")
 			testEstimateN();
-		else if( test == "testRelaxationLength")
-			testRelaxationLength();
+		else if( test == "testRelaxationLength"){
+			int a = ships["a"];
+			int b = ships["b"];
+
+			testRelaxationLength(a,b);
+		}
 		else if( test == "testStandard")
 			testStandard();
 		else if( test == "testOrigin")
@@ -179,7 +192,7 @@ public:
 			int ok = 0, nok =0, id = 0;
 
 			try {
-				Magick::Image image("800x800", "white");
+				Magick::Image image("900x900", "white");
 				//std::ostringstream oss, oss1;
 				char str[256], str1[256];
 			    image.fontPointsize( 12 );
@@ -221,6 +234,7 @@ public:
 							sprintf(str1,"+%d+%d",(int)frame1_->Get(iresult_->Get(i, 1), 0)*zoom,(int)frame1_->Get(iresult_->Get(i, 1), 1)*zoom);
 							image.annotate(str,str1);
 
+							image.strokeWidth(0.5f);
 						image.draw(Magick::DrawableLine(frame0_->Get( \
 								iresult_->Get(i, 0), 0) * zoom, frame0_->Get( \
 								iresult_->Get(i, 0), 1) * zoom, frame1_->Get( \
@@ -318,11 +332,11 @@ public:
 			return;
 		}
 	}
-	void testRelaxationLength() {
+	void testRelaxationLength(const int& a, const int& b) {
 		est_->AddFrame(frame0_);
 		est_->AddFrame(frame1_);
 		est_->Estimate();
-		int a = 325, b = 400;
+		//int a = 325, b = 400;
 		float rlength1 = est_->RelaxationLength(a, a);
 		float rlength2 = est_->RelaxationLength(a, b);
 
@@ -359,6 +373,61 @@ public:
 		}
 	}
 
+	void testDrawCluster(const int& p0, const int& p1){
+		est_->AddFrame(frame0_);
+		est_->AddFrame(frame1_);
+		est_->Estimate();
+		int i, j;
+		Sp::Matrix<int,int>* cl0 = est_->Clusters0();
+		Sp::Matrix<int,int>* cl1 = est_->Clusters1();
+
+		char label[256], pos[256];
+		int movex, movey;
+		movex =  frame0_->Get(p0,0)*zoom - move;
+		movey =  frame0_->Get(p0,1)*zoom - move;
+		try {
+			Magick::Image image( "900x900", "white" );
+			image.fontPointsize( 10 );
+
+			image.fillColor( "black" );
+
+			sprintf(pos,"+%d+%d",(int)(- movex + zoom * frame0_->Get(p0,0)), (int) (- movey + zoom * frame0_->Get(p0,1)));
+			sprintf(label,"(%d)", p0);
+			image.annotate( label, pos );
+
+			sprintf(pos,"+%d+%d",(int)(- movex + zoom * frame1_->Get(p1,0)), (int) (- movey + zoom * frame1_->Get(p1,1)));
+			sprintf(label,"(%d)", p1);
+			image.annotate( label, pos );
+
+			//image.fillColor( "black" );
+			image.draw(Magick::DrawableCircle(- movex + zoom * frame0_->Get(p0,0),  - movey + zoom * frame0_->Get(p0,1), - movex + zoom * frame0_->Get(p0,0) - 2, - movey + zoom * frame0_->Get(p0,1)));
+
+			//image.fillColor( "black" );
+			image.draw(Magick::DrawableCircle(- movex + zoom * frame1_->Get(p1,0),  - movey + zoom * frame1_->Get(p1,1), - movex + zoom * frame1_->Get(p1,0) - 2, - movey + zoom * frame1_->Get(p1,1)));
+
+			for(int i=1;i<=cluster_size;i++){
+				image.fillColor( "black" );
+
+				sprintf(pos,"+%d+%d",(int)(- movex + zoom * frame0_->Get(cl0->Get(p0,i),0)), (int)(- movey + zoom * frame0_->Get(cl0->Get(p0,i),1)));
+				sprintf(label,"(%d)", cl0->Get(p0,i));
+				image.annotate( label, pos );
+
+				sprintf(pos,"+%d+%d",(int)(- movex + zoom * frame1_->Get(cl1->Get(p1,i),0)), (int)(- movey + zoom * frame1_->Get(cl1->Get(p1,i),1)));
+				sprintf(label,"(%d)", cl1->Get(p1,i));
+				image.annotate( label, pos );
+
+				image.fillColor( "green" );
+				image.draw(Magick::DrawableCircle(- movex + zoom * frame0_->Get(cl0->Get(p0,i),0),  - movey + zoom * frame0_->Get(cl0->Get(p0,i),1), - movex + zoom * frame0_->Get(cl0->Get(p0,i),0) - 2, - movey + zoom * frame0_->Get(cl0->Get(p0,i),1)));
+				image.fillColor( "red" );
+				image.draw(Magick::DrawableCircle(- movex + zoom * frame1_->Get(cl1->Get(p1,i),0),  - movey + zoom * frame1_->Get(cl1->Get(p1,i),1), - movex + zoom * frame1_->Get(cl1->Get(p1,i),0) - 2, - movey + zoom * frame1_->Get(cl1->Get(p1,i),1)));
+			}
+			image.display( );
+		}
+		catch( exception &error_ ) {
+	      cout << "Caught exception: " << error_.what() << endl;
+	      return;
+	    }
+	}
 	void testNext() {
 
 	}

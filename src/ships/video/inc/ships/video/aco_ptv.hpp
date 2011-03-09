@@ -15,17 +15,14 @@ public:
 
 	}
 	SHIPS_INLINE ACOPTVEstimator(float alpha, float beta, float rho,
-			float tau0, int cluster_size, int cluster_max, int num_particles, int num_ants,
+			float tau0, int cluster_size, int cluster_max, int cluster01_max, int num_particles, int num_ants,
 			int num_loops) :
 		alpha_(alpha), beta_(beta), rho_(rho), tau0_(tau0), cluster_size_(
-				cluster_size), cluster_max_(cluster_max), num_particles_(num_particles), num_loops_(
+				cluster_size), cluster_min_(cluster_size), cluster_max_(cluster_max), cluster01_max_(cluster01_max), num_particles_(num_particles), num_loops_(
 				num_loops), num_ants_(num_ants), f0_(NULL), f1_(NULL), cf0_(
 				NULL), cf1_(NULL), cf0f1_(NULL), tau_(NULL), N_(NULL),
 				clusters0_(NULL), clusters1_(NULL), clusters01_(NULL), result_(NULL), Super() {
 		tau_ = new HostMatrix<float, float> (num_particles, num_particles);
-		tau_->Init(tau0);
-
-		//LOG4CXX_INFO(Sp::core_logger, "tau matrix \n"<<tau_->ToString());
 	}
 
 	virtual ~ACOPTVEstimator() {
@@ -49,9 +46,6 @@ public:
 			delete clusters1_;
 		if(clusters01_)
 			delete clusters01_;
-		//if (result_)
-		//	delete result_;
-		//LOG4CXX_INFO(Sp::core_logger, "ACOPTVEstimator destructor");
 	}
 
 	Matrix<int, int>* Estimate();
@@ -98,7 +92,9 @@ public:
 	 */
 	template<class T> void QuickSort(T numbers[], int indices[], int left,
 			int right);
-
+	/*
+	 * @brief simple distance calculation.
+	 */
 	SHIPS_INLINE
 	float Distance(float x1, float y1, float x2, float y2) {
 		return sqrt((x1 - x2) * (x1 - x2) + (y1 - y2) * (y1 - y2));
@@ -112,6 +108,14 @@ public:
 	SHIPS_INLINE
 	Matrix<int,int>* Clusters01(){
 		return clusters01_;
+	}
+	SHIPS_INLINE
+	Matrix<int,int>* Clusters0(){
+		return clusters0_;
+	}
+	SHIPS_INLINE
+	Matrix<int,int>* Clusters1(){
+		return clusters1_;
 	}
 private:
 	/*
@@ -133,9 +137,8 @@ private:
 	 * result_ num_particles_ x 2 matrix. each column is a list of particle id.
 	 */
 	Matrix<int, int>* clusters0_, *clusters1_, *clusters01_, *result_;
-	Matrix<float, float> *rcf0f1_; //for test purspose
 	float alpha_, beta_, rho_, tau0_;
-	int num_ants_, num_particles_, num_loops_, cluster_size_, cluster_max_;
+	int num_ants_, num_particles_, num_loops_, cluster_size_, cluster_min_, cluster_max_, cluster01_max_;
 	typedef MotionEstimator Super;
 };
 }
