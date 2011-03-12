@@ -79,6 +79,11 @@ public:
 	virtual Array<ValueType>& Assign(const Array<ValueType>& array);
 
 	SHIPS_INLINE
+	virtual bool IsMapped(){
+		return memory_model_->IsMapped();
+	}
+
+	SHIPS_INLINE
 	uint32_t GetWidth() {
 		return width_;
 	}

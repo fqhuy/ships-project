@@ -57,6 +57,11 @@ public:
 	 */
 	virtual Matrix<ValueType1,ValueType2>* Clone();
 
+	SHIPS_INLINE
+	virtual bool IsMapped(){
+		return array_->IsMapped();
+	}
+
 	virtual uint32_t GetWidth();
 
 	virtual uint32_t GetHeight();

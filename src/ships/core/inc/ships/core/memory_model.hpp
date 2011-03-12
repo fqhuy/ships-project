@@ -38,6 +38,25 @@ public:
 	bool IsMapped() {
 		return mapped_;
 	}
+
+	SHIPS_INLINE
+	cl::Memory& GetMemory(){
+	  return memory_;
+	}
+
+	SHIPS_INLINE
+	cl::Buffer& GetBuffer(){
+	  return buffer_;
+	}
+	SHIPS_INLINE
+	cl::Image& GetImage(){
+		if(num_dims_ == 2)
+			return image2d_;
+		else if( num_dims_ == 3)
+			return image3d_;
+
+	  //return memory_;
+	}
 	SHIPS_INLINE
 	Pointer GetMappedMemory(){
 	  return mapped_memory_;
@@ -45,6 +64,15 @@ public:
 	SHIPS_INLINE
 	uint32_t GetNumDims() {
 		return num_dims_;
+	}
+	SHIPS_INLINE
+	cl::Context& GetContext(){
+		return context_;
+	}
+
+	SHIPS_INLINE
+	void SetContext(const cl::Context& context){
+		context_ = context;
 	}
 	SHIPS_INLINE
 	virtual cl::ImageFormat GetImageFormat(){

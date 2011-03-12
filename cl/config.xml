@@ -19,6 +19,8 @@
 		modified="2001-12-31T12:00:00" name="video" vendor="ships-project.org" version="0.1">
 		<sp:program name="aco_ptv">
 			<sp:kernel name="cluster" ></sp:kernel>
+			<sp:kernel name="distances" ></sp:kernel>
+			<sp:kernel name="loop" ></sp:kernel>
 			<sp:include>ships.video.aco_ptv</sp:include>
 			<sp:requirements>
 			</sp:requirements>

@@ -65,6 +65,46 @@ public:
 		oss << "\n";
 		return oss.str();
 	}
+
+	/*
+	 * @brief sort the numbers array using Quick Sort algorithm.
+	 */
+	template<class T> static void QuickSort(T numbers[], int indices[],
+			int left, int right) {
+		T pivot;
+		int ipivot, l_hold, r_hold;
+
+		l_hold = left;
+		r_hold = right;
+		pivot = numbers[left];
+		ipivot = indices[left];
+		while (left < right) {
+			while ((numbers[right] >= pivot) && (left < right))
+				right--;
+			if (left != right) {
+				numbers[left] = numbers[right];
+				indices[left] = indices[right];
+				left++;
+			}
+			while ((numbers[left] <= pivot) && (left < right))
+				left++;
+			if (left != right) {
+				numbers[right] = numbers[left];
+				indices[right] = indices[left];
+				right--;
+			}
+		}
+		numbers[left] = pivot;
+		indices[left] = ipivot;
+
+		pivot = left;
+		left = l_hold;
+		right = r_hold;
+		if (left < pivot)
+			QuickSort(numbers, indices, left, pivot - 1);
+		if (right > pivot)
+			QuickSort(numbers, indices, pivot + 1, right);
+	}
 };
 
 class Timer {

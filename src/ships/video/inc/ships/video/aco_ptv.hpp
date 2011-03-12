@@ -22,16 +22,11 @@ public:
 				num_loops), num_ants_(num_ants), f0_(NULL), f1_(NULL), cf0_(
 				NULL), cf1_(NULL), cf0f1_(NULL), tau_(NULL), N_(NULL),
 				clusters0_(NULL), clusters1_(NULL), clusters01_(NULL), result_(NULL), Super() {
-		tau_ = new HostMatrix<float, float> (num_particles, num_particles);
 	}
 
 	virtual ~ACOPTVEstimator() {
 		if (tau_)
 			delete tau_;
-		//if (f0_)
-		//	delete f0_;
-		//if (f1_)
-		//	delete f1_;
 		if (cf0_)
 			delete cf0_;
 		if (cf1_)
@@ -48,57 +43,23 @@ public:
 			delete clusters01_;
 	}
 
-	Matrix<int, int>* Estimate();
-	/*
-	 * @brief calculate the sum of relaxation lengths between frame f0 and frame f1
-	 * @param f0 array of particle's indices from frame 0
-	 *
-	 */
-	float RelaxationLength(const int& p0, const int& p1); //private
-	/*
-	 * @brief update matrix Tau(i,j)
-	 */
-	//void Update();
-	/*
-	 * @brief choose the next node to go
-	 * @param current_pos the current particle
-	 * @param probability return the probability of traveling from current node to selected node
-	 * @return the selected node.
-	 */
-	int Next(int current_pos, float* probability, bool relaxation);
+	virtual Matrix<int, int>* Estimate();
 	/*
 	 * @brief main loop
 	 */
-	void Loop();
+	virtual void Loop()=0;
 	/*
 	 * @brief group particles into clusters.
 	 */
-	void Cluster();
+	virtual void Cluster()=0;
 	/*
 	 * @brief this private function measure the distance between particles.
 	 * @param first matrix
 	 * @param second matrix
 	 * @return the matrix represents distances between particles from f0 and f1
 	 */
-	Matrix<float, float>* Distances(Matrix<float, float>* f0, Matrix<float,
-			float>* f1, bool relaxation = false);
-	/*
-	 * @brief this function sort the elements in the same row increasingly.
-	 * @param matrix the matrix to sort.
-	 */
-	void Sort(Matrix<float, float>* matrix, Matrix<int, int>* indices);
-	/*
-	 * @brief sort the numbers array using Quick Sort algorithm.
-	 */
-	template<class T> void QuickSort(T numbers[], int indices[], int left,
-			int right);
-	/*
-	 * @brief simple distance calculation.
-	 */
-	SHIPS_INLINE
-	float Distance(float x1, float y1, float x2, float y2) {
-		return sqrt((x1 - x2) * (x1 - x2) + (y1 - y2) * (y1 - y2));
-	}
+	virtual Matrix<float, float>* Distances(Matrix<float, float>* f0, Matrix<float,
+			float>* f1, bool relaxation = false)=0;
 
 	SHIPS_INLINE
 	Matrix<float,float>* Cf0f1(){
@@ -117,7 +78,7 @@ public:
 	Matrix<int,int>* Clusters1(){
 		return clusters1_;
 	}
-private:
+protected:
 	/*
 	 * f0_ frame 0
 	 * f1_ frame 1

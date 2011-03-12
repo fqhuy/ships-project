@@ -18,3 +18,20 @@ __kernel void cluster(unsigned int size){
 		cout << endl;
 */
 };
+
+__kernel void distances(__write_only image2d_t result, __global float2* f0, __global float2* f1, const uint size){
+	uint globalIdx = get_global_id(0);
+	uint globalIdy = get_global_id(1);
+
+	int i = globalIdy;
+	
+	while(i<size){
+		write_imagef(result, (int2) (i,globalIdx), (float4) distance(f0[i], f1[globalIdx]));
+		i+=4;
+	}
+};
+
+
+__kernel void loop(__global float* f0, __global float* f1){
+	
+};

@@ -27,8 +27,8 @@ public:
 	}
 	void setUp() {
 		Sp::OctaveTextMatrixReader reader_;
-		frame0_ = new Sp::HostMatrix<float,float>(2,1024);
-		frame1_ = new Sp::HostMatrix<float,float>(2,1024);
+		frame0_ = new Sp::Matrix<float,float>(2,1024);
+		frame1_ = new Sp::Matrix<float,float>(2,1024);
 		reader_.ReadAsFloatMatrix(
 				"/home/fqhuy/Documents/Projects/ships-project-build/bin/data/frame0a",
 				frame0_);

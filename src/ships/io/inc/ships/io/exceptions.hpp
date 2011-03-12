@@ -10,14 +10,7 @@
 
 namespace Sp {
 
-class IOExeption: public std::exception {
-public:
-	IOExeption() {
-	}
-	virtual const char* what() const throw () {
-		return "IOException occurred.";
-	}
-};
+
 
 }
 #endif /* SHIPS_IO_EXCEPTIONS_HPP__ */
