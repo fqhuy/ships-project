@@ -33,16 +33,15 @@ template<class T> SampleModel<T,T>* PixelInterleavedSampleModel<T>::Clone(){
 template<class T> Array<T>* PixelInterleavedSampleModel<T>::CreateArray(
 		MemoryModel<T>* memory_model) {
 
-	if (memory_model->GetNumDims() == 1) {
-		uint32_t size = this->CalculateBufferSize(memory_model->GetAlignment());
+	uint32_t dims[16];
+	ArrayUtils::copyArray(0,SP_MAX_NUM_DIMENSIONS,this->dims_,dims);
 
-		Array<T>* re =  new Array<T> (1, &size, memory_model, (T)0);
-		//fill the padded portion by 0
-		if(size > this->dims_[0]){
-			for(int i=this->dims_[0];i<size;i++)
-				re->Set(0,i);
-		}
-		return re;
+	if (memory_model->GetNumDims() == 1) {
+		//uint32_t size = this->CalculateBufferSize(memory_model->GetAlignment());
+		//Array<T>* re=NULL;
+		dims[0] = this->dims_[0]*this->num_channels_;
+		//re =  new Array<T> (this->num_dims_, dims, memory_model, (T)0);
+		//return re;
 	}
 
 	if (memory_model->GetNumDims() == 2 || memory_model->GetNumDims() == 3) {
@@ -65,12 +64,23 @@ template<class T> Array<T>* PixelInterleavedSampleModel<T>::CreateArray(
 			imf.image_channel_order = CL_A;
 			break;
 		}
-
 		memory_model->SetImageFormat(imf);
-
-		return new Array<T> (this->num_dims_, this->dims_, memory_model, (T) 0);
 	}
 
-	return NULL;
+	try{
+		MemoryModel<T>* m1 = dynamic_cast<HostMemoryModel<T>* >(memory_model);
+		if(m1!=NULL)
+			return new HostArray<T> (this->num_dims_, (uint32_t*) dims, memory_model, (T) 0);
+
+		m1 = dynamic_cast<DeviceMemoryModel<T>* >(memory_model);
+		if(m1!=NULL)
+			return new DeviceArray<T> (this->num_dims_, (uint32_t*)dims, memory_model, (T) 0);
+
+
+	} catch (std::exception& e){
+		LOG4CXX_ERROR(core_logger,e.what());
+	}
+
+	return new Array<T> (this->num_dims_, (uint32_t*)dims, memory_model, (T) 0);
 }
 }

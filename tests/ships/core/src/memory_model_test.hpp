@@ -52,5 +52,5 @@ public:
 	}
 
 };
-CPPUNIT_TEST_SUITE_REGISTRATION(HostMemoryModelTest);
+//CPPUNIT_TEST_SUITE_REGISTRATION(HostMemoryModelTest);
 #endif /* MODEL_TEST_HPP_ */

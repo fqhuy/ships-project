@@ -114,6 +114,7 @@ template<class T1, class T2> int OctaveTextMatrixReader::Read(
 		}
 		s = this->input_stream_->ReadLine(128, '\n');
 		sscanf(s.c_str(), "%lf", &temp);
+
 		matrix->Set((T1) temp, i, sizes[0] - 1);
 	}
 

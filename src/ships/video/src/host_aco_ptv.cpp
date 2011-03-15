@@ -234,7 +234,7 @@ void HostACOPTVEstimator::Sort(Matrix<float, float>* matrix,
 }
 
 Matrix<float, float>* HostACOPTVEstimator::Distances(Matrix<float, float>* f0,
-		Matrix<float, float>* f1, bool relaxation) {
+		Matrix<float, float>* f1,Matrix<float, float>* result,  bool relaxation) {
 
 	if (f0 == NULL || f1 == NULL)
 		return NULL;
@@ -246,8 +246,8 @@ Matrix<float, float>* HostACOPTVEstimator::Distances(Matrix<float, float>* f0,
 	const int h = f1->GetHeight();
 	const int half = h / 2 + 1;
 
-	Matrix<float, float>* result = new HostMatrix<float, float> (h, h);
-	result->Zeros();
+	Matrix<float, float>* result_ = new HostMatrix<float, float> (h, h);
+	result_->Zeros();
 
 	float temp;
 
@@ -264,11 +264,11 @@ Matrix<float, float>* HostACOPTVEstimator::Distances(Matrix<float, float>* f0,
 				temp = this->RelaxationLength(i, j);
 			else
 				temp = this->Distance(x1, y1, x2, y2);
-			result->Set(temp, i, j);
+			result_->Set(temp, i, j);
 		}
 	}
 
-	return result;
+	return result_;
 }
 
 void HostACOPTVEstimator::Cluster() {

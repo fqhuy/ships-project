@@ -14,20 +14,24 @@
 class MatrixTest: public CppUnit::TestFixture {
 
 	CPPUNIT_TEST_SUITE( MatrixTest );
-	CPPUNIT_TEST( testClone );
+	CPPUNIT_TEST( testGet );
+	//CPPUNIT_TEST( testClone );
 	//CPPUNIT_TEST( testSub );
 	CPPUNIT_TEST_SUITE_END();
 
 	private:
-		Sp::Matrix<int, int>* matrix_;
+		Sp::Matrix<float, float>* matrix_;
 		int width_, height_;
 	public:
 		void setUp() {
+			width_ = 2;
+			height_ = 256;
 			//LOG4CXX_INFO(Sp::core_logger, "matrix_test: creating matrix...");
-			width_ = 4;
-			height_ = 4;
+			uint32_t dims[]  = {width_, height_};
+			Sp::SampleModel<float,float>* sm = new Sp::PixelInterleavedSampleModel<float>(1,2,dims);
+			Sp::MemoryModel<float>* mm = new Sp::MemoryModel<float>(1,true,true,2,Sp::READ);
 
-			matrix_ = new Sp::Matrix<int, int>(width_ , height_);
+			matrix_ = new Sp::Matrix<float,float>(width_,height_,mm,sm);
 
 		}
 
@@ -36,25 +40,32 @@ class MatrixTest: public CppUnit::TestFixture {
 		}
 
 		void testAdd() {
-			//int value = 10;
+
 			//matrix_->Add(value);
 
-			//for(int i=0;i<width_;i++)
-			//	for(int j=0;j<height_;j++)
-			//		LOG4CXX_INFO(Sp::core_logger, matrix_->Get(i,j));
+			LOG4CXX_INFO(Sp::core_logger,matrix_->ToString());
 		}
 		void testSet(){
-			for(int i=0;i<width_;i++)
-				for(int j=0;j<height_;j++)
-					matrix_->Set(i*j,i,j);
+			for(int i=0;i<height_;i++)
+				for(int j=0;j<width_;j++){
+					matrix_->Set(i+j,i,j);
+				}
 		}
-		void testSub() {
+		void testGet(){
+			testSet();
+			LOG4CXX_INFO(Sp::core_logger, matrix_->ToString());
+			for(int i=0;i<height_;i++)
+				for(int j=0;j<width_;j++){
+					CPPUNIT_ASSERT(matrix_->Get(i,j)==i+j);
+				}
+		}
+
+		void testToString(){
 
 		}
-
 		void testClone(){
 			testSet();
-			Sp::Matrix<int,int>* clone = NULL;
+			Sp::Matrix<float,float>* clone = NULL;
 			clone = matrix_->Clone();
 
 			LOG4CXX_INFO(Sp::core_logger, clone->ToString());
@@ -63,6 +74,7 @@ class MatrixTest: public CppUnit::TestFixture {
 		}
 };
 CPPUNIT_TEST_SUITE_REGISTRATION(MatrixTest);
+
 class HostMatrixTest: public CppUnit::TestFixture {
 	CPPUNIT_TEST_SUITE( HostMatrixTest );
 	//CPPUNIT_TEST( testSet );
@@ -126,7 +138,7 @@ class HostMatrixTest: public CppUnit::TestFixture {
 		}
 };
 
-CPPUNIT_TEST_SUITE_REGISTRATION(HostMatrixTest);
+//CPPUNIT_TEST_SUITE_REGISTRATION(HostMatrixTest);
 
 class DeviceMatrixTest: public CppUnit::TestFixture {
 

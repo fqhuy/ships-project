@@ -23,16 +23,24 @@ public:
 
 	void testReadAsDoubleMatrix() {
 	    Sp::Matrix<float,float>* matrix = NULL;
+
+		int width_ = 2;
+		int height_ = 512;
+		//LOG4CXX_INFO(Sp::core_logger, "matrix_test: creating matrix...");
+		uint32_t dims[]  = {width_, height_};
+		Sp::SampleModel<float,float>* sm = new Sp::PixelInterleavedSampleModel<float>(1,2,dims);
+		Sp::MemoryModel<float>* mm = new Sp::MemoryModel<float>(1,true,true,2,Sp::READ);
+
+		matrix = new Sp::Matrix<float,float>(width_,height_,mm,sm);
+
 	    reader_.ReadAsFloatMatrix("data/frame0a",matrix);
 	    
 	    if(matrix==NULL)
 	    	LOG4CXX_ERROR(Sp::io_logger, "plugin_octave_text_matrix_test.hpp: error in reading matrix.");
 
-	    for(int i=0;i<matrix->GetHeight();i++)
-	     // for(int j=0;j<matrix->GetWidth();j++)
-	    	  LOG4CXX_INFO(Sp::io_logger, matrix->Get(i,0) << " : " << matrix->Get(i,1));
+	    LOG4CXX_INFO(Sp::io_logger, matrix->ToString());
 
-	    //delete matrix;
+	    delete matrix;
 	}
 
 };

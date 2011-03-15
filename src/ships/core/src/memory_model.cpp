@@ -11,7 +11,9 @@ namespace Sp {
 
 #define INSTANTIATE_MEMORY_MODEL(T) \
 	template class MemoryModel<T>; \
+	template uint32_t MemoryModel<T>::CalculateBufferSize(const uint32_t& num_dims, const uint32_t dims[]); \
 	template MemoryModel<T>* MemoryModel<T>::Clone(); \
+	template T* MemoryModel<T>::CreateArray(const uint32_t& num_dims, uint32_t dims[SP_MAX_NUM_DIMENSIONS]); \
 	template T* MemoryModel<T>::CreateArray(size_t width); \
 	template T* MemoryModel<T>::CreateArray(uint32_t width, uint32_t height); \
 	template T* MemoryModel<T>::Map(int32_t x, int32_t y, uint32_t width, uint32_t height); \
@@ -126,6 +128,48 @@ template<class T> void HostMemoryModel<T>::UnMap(){
 	LOG4CXX_ERROR( Sp::core_logger, "can not perform an unmap operation on host memory model.");
 }
 /* ----------------------- Memory Model -----------------------*/
+template<class T> uint32_t MemoryModel<T>::CalculateBufferSize(const uint32_t& num_dims, const uint32_t dims[]){
+
+
+	if(!dims)
+		return 0;
+	uint32_t size = 1;
+	switch(this->image_format_.image_channel_order){
+	case CL_R:
+	case CL_A:
+	//case CL_Rx:
+	case CL_INTENSITY:
+	case CL_LUMINANCE:
+		size = 1;
+	break;
+	case CL_RG:
+	case CL_RA:
+	//case CL_RGx:
+		size  = 2;
+		break;
+	case CL_RGB:
+	//case CL_RGBx:
+		size  = 3;
+		break;
+	case CL_RGBA:
+	case CL_ARGB:
+	case CL_BGRA:
+		size  = 4;
+		break;
+	default:
+		break;
+	}
+	for(int i=0;i<num_dims;i++){
+		size*=dims[i];
+	}
+
+	if(size % alignment_==0){
+		return size;
+	} else {
+		size = (size/alignment_ + 1)*alignment_;
+		return size;
+	}
+}
 template<class T> MemoryModel<T>* MemoryModel<T>::Clone(){
 	//TODO: this function should do copy in host side instead of unmap and copy in device side.
 	int err=0;
@@ -140,7 +184,7 @@ template<class T> MemoryModel<T>* MemoryModel<T>::Clone(){
 	switch(this->num_dims_){
 	case 1:
 		re->CreateArray(this->dims_[0]);
-		this->queue_.enqueueCopyBuffer(this->buffer_,re->buffer_,0,0,(int)this->dims_[0]);
+		this->queue_.enqueueCopyBuffer(this->buffer_,re->buffer_,0,0,(int)this->dims_[0]*sizeof(T));
 		break;
 	case 2:
 		re->CreateArray(this->dims_[0],this->dims_[1]);
@@ -163,46 +207,54 @@ template<class T> MemoryModel<T>* MemoryModel<T>::Clone(){
 	return re;
 }
 
-template<class T> T* MemoryModel<T>::CreateArray(uint32_t width) {
+template<class T> T*  MemoryModel<T>::CreateArray(const uint32_t& num_dims, uint32_t dims[SP_MAX_NUM_DIMENSIONS]){
 	if(!this->context_())
 		this->context_ = DeviceManager::Instance().GetDefaultContext();
-	this->dims_[0] = width;
-	//TODO: currently, only CL_MEM_ALLOC_HOST_PTR constant is used.
+
+	int err=0;
+	int size = this->CalculateBufferSize(num_dims,dims);
+
+	if(!pinned_)
+		this->mapped_memory_ = new T[size];
+
 	switch(this->num_dims_){
 	case 1:
-		this->buffer_ = cl::Buffer(this->context_, CL_MEM_ALLOC_HOST_PTR , width);
+		this->buffer_ = cl::Buffer(this->context_, this->flag_ , size*sizeof(T), this->mapped_memory_, &err);
+		if(err!=CL_SUCCESS)
+			LOG4CXX_ERROR(Sp::core_logger, "can not create buffer, error code is: "<<err);
+		this->dims_[0] = size;
+		this->memory_ = this->buffer_;
+		if(this->mapped_==true)
+			return this->Map(0,size);
 		break;
 	case 2:
+		this->image2d_ = cl::Image2D(this->context_,this->flag_ , this->image_format_, dims[0], dims[1], 0, this->mapped_memory_, &err);
+		if(err!=CL_SUCCESS){
+			LOG4CXX_ERROR(Sp::core_logger, "memory_model: error in creating image: " << err);
+			return NULL;
+		}
+		this->memory_ = this->image2d_;
+		this->dims_[0] = dims[0];
+		this->dims_[1] = dims[1];
+
+		if(this->mapped_==true)
+			return this->Map(0,0,dims[0], dims[1] );
 		break;
 	case 3:
 		break;
 	default:
 		return NULL;
+		break;
 	}
-	this->memory_ = this->buffer_;
-	return this->Map(0,width);
+}
+
+template<class T> T* MemoryModel<T>::CreateArray(uint32_t width) {
+	return this->CreateArray(1,&width);
 }
 
 template<class T> T* MemoryModel<T>::CreateArray(uint32_t width, uint32_t height){
-	if(!this->context_())
-		this->context_ = DeviceManager::Instance().GetDefaultContext();
-	int err=0;
-	switch(this->num_dims_){
-	case 2:
-
-		this->image2d_ = cl::Image2D(this->context_,CL_MEM_ALLOC_HOST_PTR , this->image_format_, width, height, 0, NULL, &err);
-		if(err!=CL_SUCCESS){
-			LOG4CXX_ERROR(Sp::core_logger, "memory_model: error in creating image: " << err);
-			return NULL;
-		}
-		break;
-	default:
-		return NULL;
-	}
-	this->dims_[0] = width;
-	this->dims_[1] = height;
-	this->memory_ = this->image2d_;
-	return this->Map(0,0,width, height );
+	uint32_t dims[] = {width, height};
+	return this->CreateArray(2,dims);
 }
 
 template<class T> T* MemoryModel<T>::Map(int32_t x, int32_t y, uint32_t width, uint32_t height){
@@ -229,10 +281,12 @@ template<class T> T* MemoryModel<T>::Map(int32_t x, int32_t y, uint32_t width, u
 template<class T> T* MemoryModel<T>::Map(int32_t offset, size_t size){
 	if(this->queue_()==NULL)
 		this->queue_ = cl::CommandQueue(this->context_,DeviceManager::Instance().GetDefaultDevice());
-
+	int err=0;
 	switch(this->num_dims_){
 	case 1:
-		this->mapped_memory_ = (T*) this->queue_.enqueueMapBuffer(this->buffer_, CL_TRUE, CL_MAP_READ | CL_MAP_WRITE, offset, size);
+		this->mapped_memory_ = (T*) this->queue_.enqueueMapBuffer(this->buffer_, CL_TRUE, CL_MAP_READ | CL_MAP_WRITE, offset, size*sizeof(T), NULL, NULL, &err);
+		if(err!=CL_SUCCESS)
+			LOG4CXX_INFO(core_logger, "error in mapping buffer, error code is "<<err);
 		break;
 	case 2:
 		break;
@@ -247,6 +301,10 @@ template<class T> T* MemoryModel<T>::Map(int32_t offset, size_t size){
 }
 
 template<class T> T* MemoryModel<T>::Map(){
+	if(this->num_dims_==1)
+		return this->Map(0,this->dims_[0]);
+	else if(this->num_dims_==2)
+		return this->Map(0,0,this->dims_[0],this->dims_[1]);
 	return NULL;
 }
 
@@ -263,7 +321,7 @@ template<class T> T* DeviceMemoryModel<T>::CreateArray(uint32_t width){
 
 	switch(this->num_dims_){
 	case 1:
-		this->buffer_ = cl::Buffer(this->context_, CL_MEM_READ_WRITE, width);
+		this->buffer_ = cl::Buffer(this->context_, this->flag_, width);
 		break;
 	case 2:
 		break;
@@ -282,7 +340,7 @@ template<class T> T* DeviceMemoryModel<T>::Map(int32_t offset, size_t size){
 }
 
 template<class T> T* DeviceMemoryModel<T>::Map(){
-
+	//TODO: unimplemented DeviceMemoryModel mapping.
 }
 
 //template<class T> void DeviceMemoryModel<T>::UnMap(){

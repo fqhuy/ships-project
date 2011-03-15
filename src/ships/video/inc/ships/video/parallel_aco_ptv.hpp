@@ -21,8 +21,8 @@ public:
 		Super(alpha, beta, rho, tau0, cluster_size, cluster_max, cluster01_max,
 				num_particles, num_ants, num_loops) {
 
-		this->tau_ = new Matrix<float, float> (num_particles, num_particles);
-		this->N_ = new Vector<bool, bool> (num_particles);
+		//this->tau_ = new Matrix<float, float> (num_particles, num_particles);
+		//this->N_ = new Vector<bool, bool> (num_particles);
 
 		//int err;
 		//this->context_ = DeviceManager::Instance().GetDefaultContext();
@@ -40,7 +40,18 @@ public:
 	 * @return the matrix represents distances between particles from f0 and f1
 	 */
 	Matrix<float, float>* Distances(Matrix<float, float>* f0, Matrix<float,
-			float>* f1, bool relaxation = false);
+			float>* f1, Matrix<float, float>* result=NULL, bool relaxation = false);
+	/*
+	 * @brief calculate the sum of relaxation length between particle p0 and particle p1
+	 * @param p0 first particle
+	 * @param p1 second particle
+	 */
+	float RelaxationLength(const int& p0, const int& p1); //private
+	/*
+	 * @brief this function sort the elements in the same row increasingly.
+	 * @param matrix the matrix to sort.
+	 */
+	void Sort(Matrix<float, float>* matrix, Matrix<int, int>* indices);
 
 	void AddFrame(Matrix<float,float>* frame) throw (InvalidContextException);
 private:

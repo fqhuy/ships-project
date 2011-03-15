@@ -14,7 +14,6 @@ namespace Sp {
 	template Array<T>* Array<T>::Clone(); \
 	template Array<T>& Array<T>::Assign(const Array<T>& array); \
 	template std::string Array<T>::ToString();
-
 INSTANTIATE_ARRAY(int8_t)
 ;
 INSTANTIATE_ARRAY(uint8_t)
@@ -126,17 +125,17 @@ template<class T> void Array<T>::Init(uint32_t num_dims, uint32_t* dims,
 	}
 }
 
-template<class T> std::string Array<T>::ToString(){
-	std::ostringstream oss (std::ostringstream::out);
-	oss<<endl;
-	oss<<std::fixed;
+template<class T> std::string Array<T>::ToString() {
+	std::ostringstream oss(std::ostringstream::out);
+	oss << endl;
+	oss << std::fixed;
 	T temp = 0;
-	for(int i=0;i<this->height_;i++){
-		for(int j=0;j<this->width_;j++){
-			temp = this->Get(i,j);
-			oss<<temp<<std::fixed<<"\t";
+	for (int i = 0; i < this->height_; i++) {
+		for (int j = 0; j < this->width_; j++) {
+			temp = this->Get(i, j);
+			oss << temp << std::fixed << "\t";
 		}
-		oss<< endl;
+		oss << endl;
 	}
 	return oss.str();
 }

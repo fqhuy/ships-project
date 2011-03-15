@@ -23,12 +23,28 @@ public:
 	MemoryModel(uint32_t num_dims, bool mapped = true,
 			bool pinned = false, uint8_t alignment=4,AccessModes access_mode = READ_WRITE) :
 		num_dims_(num_dims), mapped_(mapped), alignment_(alignment), access_mode_(access_mode),
-				pinned_(pinned) {
+				pinned_(pinned), mapped_memory_(NULL), flag_(0) {
 		dims_[0] = dims_[1] = dims_[2] = 1;
+
+		if(this->access_mode_==READ)
+			flag_=flag_|CL_MEM_READ_ONLY;
+
+		if(this->access_mode_==READ_WRITE)
+			flag_=flag_|CL_MEM_READ_WRITE;
+
+		if(this->access_mode_==WRITE)
+				flag_=flag_|CL_MEM_WRITE_ONLY;
+
+		if(this->pinned_ == true)
+			flag_=flag_|CL_MEM_ALLOC_HOST_PTR;
+		else{
+			flag_=flag_|CL_MEM_USE_HOST_PTR;
+		}
+
 	}
 
 	virtual ~MemoryModel() {
-		if (mapped_ && memory_() != NULL) {
+		if (mapped_==true && memory_() != NULL) {
 			queue_.enqueueUnmapMemObject(memory_, mapped_memory_);
 		}
 		//mapped_memory_ = NULL;
@@ -56,6 +72,14 @@ public:
 			return image3d_;
 
 	  //return memory_;
+	}
+	SHIPS_INLINE
+	cl::Image2D& GetImage2D(){
+		return image2d_;
+	}
+	SHIPS_INLINE
+	cl::Image3D& GetImage3D(){
+		return image3d_;
 	}
 	SHIPS_INLINE
 	Pointer GetMappedMemory(){
@@ -105,6 +129,7 @@ public:
 	 */
 	virtual MemoryModel<ValueType>* Clone();
 	//creating array in bytes
+	virtual Pointer CreateArray(const uint32_t& num_dims, uint32_t dims[SP_MAX_NUM_DIMENSIONS]);
 	virtual Pointer CreateArray(uint32_t width);
 	virtual Pointer CreateArray(uint32_t width, uint32_t height);
 	//virtual void* CreateArray(size_t width, size_t height, size_t depth);
@@ -122,6 +147,11 @@ protected:
 	cl::CommandQueue queue_;
 	Pointer mapped_memory_;
 	cl::ImageFormat image_format_;
+
+	cl_mem_flags flag_;
+
+	uint32_t CalculateBufferSize(const uint32_t& num_dims, const uint32_t dims[]);
+
 private:
 	bool pinned_;
 };

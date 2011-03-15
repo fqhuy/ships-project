@@ -56,7 +56,7 @@ public:
 	 * @return the matrix represents distances between particles from f0 and f1
 	 */
 	Matrix<float, float>* Distances(Matrix<float, float>* f0, Matrix<float,
-			float>* f1, bool relaxation = false);
+			float>* f1,Matrix<float, float>* result=NULL,  bool relaxation = false);
 	/*
 	 * @brief this function sort the elements in the same row increasingly.
 	 * @param matrix the matrix to sort.

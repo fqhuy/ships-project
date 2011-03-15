@@ -71,5 +71,5 @@ public:
 	}
 };
 
-CPPUNIT_TEST_SUITE_REGISTRATION(HostVectorTest);
+//CPPUNIT_TEST_SUITE_REGISTRATION(HostVectorTest);
 #endif /* VECTOR_TEST_HPP_ */

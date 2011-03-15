@@ -61,7 +61,7 @@ class ArrayTest: public CppUnit::TestFixture {
 
 		}
 };
-CPPUNIT_TEST_SUITE_REGISTRATION(ArrayTest);
+//CPPUNIT_TEST_SUITE_REGISTRATION(ArrayTest);
 
 class HostArrayTest: public CppUnit::TestFixture {
 	CPPUNIT_TEST_SUITE( HostArrayTest );
@@ -115,6 +115,6 @@ class HostArrayTest: public CppUnit::TestFixture {
 		}
 };
 
-CPPUNIT_TEST_SUITE_REGISTRATION(HostArrayTest);
+//CPPUNIT_TEST_SUITE_REGISTRATION(HostArrayTest);
 
 #endif /* ARRAY_TEST_HPP_ */

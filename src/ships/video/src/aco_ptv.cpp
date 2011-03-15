@@ -19,23 +19,27 @@ Matrix<int, int>* ACOPTVEstimator::Estimate() {
 	this->N_->Init(true);
 
 	this->tau_->Init(this->tau0_);
-	/*-----------------------------Measure distances between particles--------------------------------*/
-	this->cf0_ = this->Distances(this->f0_, this->f0_);
-	if (!this->cf0_)
-		return NULL;
 
-	this->cf1_ = this->Distances(this->f1_, this->f1_);
-	if (!this->cf1_)
-		return NULL;
+	try {
+		/*-----------------------------Measure distances between particles--------------------------------*/
+		this->cf0_ = this->Distances(this->f0_, this->f0_);
+		if (!this->cf0_)
+			return NULL;
 
-	this->cf0f1_ = this->Distances(this->f0_, this->f1_);
-	if (!this->cf0f1_)
-		return NULL;
-	/*-----------------------------Cluster particles in a frame into groups----------------------------*/
-	this->Cluster();
-	/*-----------------------------Iterate the finding process-----------------------------------------*/
-	this->Loop();
+		this->cf1_ = this->Distances(this->f1_, this->f1_);
+		if (!this->cf1_)
+			return NULL;
 
+		this->cf0f1_ = this->Distances(this->f0_, this->f1_);
+		if (!this->cf0f1_)
+			return NULL;
+		/*-----------------------------Cluster particles in a frame into groups----------------------------*/
+		this->Cluster();
+		/*-----------------------------Iterate the finding process-----------------------------------------*/
+		this->Loop();
+	} catch (std::exception& e) {
+		LOG4CXX_ERROR(Sp::video_logger, "An error occured: "<< e.what());
+	}
 	return this->result_;
 }
 

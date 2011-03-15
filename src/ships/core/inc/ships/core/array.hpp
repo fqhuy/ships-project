@@ -68,10 +68,11 @@ public:
 	}
 
 	virtual ~Array() {
-		data_ = NULL;
+
 		//delete []steps_;
 		//delete []dims_;
 		delete memory_model_;
+		data_ = NULL;
 	}
 
 	virtual void Resize(uint32_t* dims);
@@ -236,14 +237,14 @@ public:
 	}
 
 	SHIPS_INLINE
-	HostArray(const uint32_t& num_dims, uint32_t* dims, HostMemoryModel<
+	HostArray(const uint32_t& num_dims, uint32_t* dims, MemoryModel<
 			ValueType>* memory_model, ValueType init_value = 0) :
 		Super(num_dims, dims, memory_model, init_value) {
 
 	}
 
 	SHIPS_INLINE
-	HostArray(const uint32_t&  num_dims, uint32_t* dims, HostMemoryModel<
+	HostArray(const uint32_t&  num_dims, uint32_t* dims, MemoryModel<
 			ValueType>* memory_model, Pointer data) :Super (num_dims, dims, memory_model, data)
 	{
 
@@ -271,7 +272,19 @@ public:
 	typedef const T& ConstReference;
 	typedef T* Pointer;
 
-	SHIPS_INLINE DeviceArray(int num_dims, uint32_t* dims, DeviceMemoryModel<
+	SHIPS_INLINE
+	DeviceArray(const uint32_t& width, const uint32_t& height, ValueType init_value=0) {
+		MemoryModel<T>* mm = new HostMemoryModel<T>(2,1);
+		uint32_t dims[] = { width, height };
+		this->Init(2, dims, mm, true, init_value);
+	}
+
+	SHIPS_INLINE
+	DeviceArray(const uint32_t& width,const uint32_t& height,
+			MemoryModel<ValueType>* memory_model, ValueType init_value = 0): Super(width, height, memory_model, init_value){
+
+	}
+	SHIPS_INLINE DeviceArray(int num_dims, uint32_t* dims, MemoryModel<
 			ValueType>* memory_model, ValueType init_value = 0) :
 		Super (num_dims, dims, memory_model, init_value) {
 		this->memory_model_->UnMap();

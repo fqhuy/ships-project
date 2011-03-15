@@ -59,7 +59,18 @@ public:
 	 * @return the matrix represents distances between particles from f0 and f1
 	 */
 	virtual Matrix<float, float>* Distances(Matrix<float, float>* f0, Matrix<float,
-			float>* f1, bool relaxation = false)=0;
+			float>* f1, Matrix<float, float>* result=NULL, bool relaxation = false)=0;
+	/*
+	 * @brief calculate the sum of relaxation length between particle p0 and particle p1
+	 * @param p0 first particle
+	 * @param p1 second particle
+	 */
+	virtual float RelaxationLength(const int& p0, const int& p1)=0; //private
+	/*
+	 * @brief this function sort the elements in the same row increasingly.
+	 * @param matrix the matrix to sort.
+	 */
+	virtual void Sort(Matrix<float, float>* matrix, Matrix<int, int>* indices)=0;
 
 	SHIPS_INLINE
 	Matrix<float,float>* Cf0f1(){

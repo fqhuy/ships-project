@@ -10,9 +10,9 @@
 
 #include <Magick++.h>
 
-class HostACOPTVEstimatorTest: public CPPUNIT_NS::TestFixture {
+class ACOPTVEstimatorTest: public CPPUNIT_NS::TestFixture {
 
-	CPPUNIT_TEST_SUITE( HostACOPTVEstimatorTest);
+	CPPUNIT_TEST_SUITE( ACOPTVEstimatorTest);
 	//CPPUNIT_TEST( testStandard);
 	//CPPUNIT_TEST( testOrigin );
 	//CPPUNIT_TEST( testEstimate );
@@ -31,7 +31,7 @@ private:
 	Sp::Matrix<float, float>* frame1_;
 	Sp::Matrix<float, float>* result_;
 	Sp::Matrix<int, int>* iresult_;
-	Sp::HostACOPTVEstimator* est_;
+	Sp::ACOPTVEstimator* est_;
 	//std::string file0_, file1_;
 	libconfig::Config cfg_;
 
@@ -48,8 +48,9 @@ private:
 
 	int zoom;
 	int move;
+	int mode; //0=Host, 1=Device
 public:
-	HostACOPTVEstimatorTest() :
+	ACOPTVEstimatorTest() :
 		frame0_(NULL), frame1_(NULL), result_(NULL), iresult_(NULL), est_(NULL) {
 		cfg_.readFile(
 				"/home/fqhuy/Documents/Projects/ships-project-build/bin/aco_ptv_test.cfg");
@@ -78,8 +79,9 @@ public:
 		zoom = ships["zoom"];
 		move = ships["move"];
 		move *= zoom;
+		mode = ships["mode"];
 	}
-	virtual ~HostACOPTVEstimatorTest() {
+	virtual ~ACOPTVEstimatorTest() {
 		if (frame0_)
 			delete frame0_;
 		if (frame1_)
@@ -97,14 +99,35 @@ public:
 		std::string file1_ = ships["second_frame"];
 
 		Sp::OctaveTextMatrixReader reader_;
-		frame0_ = new Sp::HostMatrix<float, float>(DIM, SIZE);
-		frame1_ = new Sp::HostMatrix<float, float>(DIM, SIZE);
-		reader_.ReadAsFloatMatrix(file0_, frame0_);
 
+		if (mode == 0) {
+			frame0_ = new Sp::HostMatrix<float, float>(DIM, SIZE);
+			frame1_ = new Sp::HostMatrix<float, float>(DIM, SIZE);
+		} else if (mode == 1) {
+			uint32_t dims1[]  = {DIM, SIZE};
+			uint32_t dims2[]  = {DIM, SIZE};
+
+			Sp::SampleModel<float,float>* sm1 = new Sp::PixelInterleavedSampleModel<float>(1,2,dims1);
+			Sp::SampleModel<float,float>* sm2 = new Sp::PixelInterleavedSampleModel<float>(1,2,dims2);
+
+			Sp::MemoryModel<float>* mm1 = new Sp::MemoryModel<float>(1,true,true,2,Sp::READ);
+			Sp::MemoryModel<float>* mm2 = new Sp::MemoryModel<float>(1,true,true,2,Sp::READ);
+
+			frame0_ = new Sp::Matrix<float,float>(DIM,SIZE,mm1,sm1);
+			frame1_ = new Sp::Matrix<float,float>(DIM,SIZE,mm2,sm2);
+
+		}
+
+		reader_.ReadAsFloatMatrix(file0_, frame0_);
 		reader_.ReadAsFloatMatrix(file1_, frame1_);
 
-		est_ = new Sp::HostACOPTVEstimator(alpha, beta, rho, tau0, cluster_size,
-				cluster_max, cluster01_max, num_particles, num_ants, num_loops);
+		if(mode==0){
+			est_ = new Sp::HostACOPTVEstimator(alpha, beta, rho, tau0,
+				cluster_size, cluster_max, cluster01_max, num_particles,
+				num_ants, num_loops);
+		} else if(mode==1) {
+			est_ = new Sp::ParallelACOPTVEstimator(alpha,beta,rho,tau0,cluster_size,cluster_max,cluster01_max,num_particles,num_ants,num_loops);
+		}
 
 	}
 
@@ -118,6 +141,8 @@ public:
 
 		if (test == "testCluster")
 			testCluster();
+		else if(test == "testDistances")
+			testDistances();
 		else if (test == "testDrawCluster") {
 			int a = ships["a"];
 			int b = ships["b"];
@@ -138,18 +163,27 @@ public:
 	}
 
 	void testDistances() {
-
-		result_ = est_->Distances(frame0_, frame1_);
-		//LOG4CXX_INFO(Sp::video_logger, frame0_->ToString());
-		//LOG4CXX_INFO(Sp::video_logger, frame1_->ToString());
-		//LOG4CXX_INFO(Sp::video_logger, result_->ToString());
 		est_->AddFrame(frame0_);
 		est_->AddFrame(frame1_);
+
+		try{
+			result_ = est_->Distances(frame0_, frame1_);
+		} catch (...){
+			LOG4CXX_INFO(Sp::video_logger, "an error occured during distances calculation");
+		}
+
+		///LOG4CXX_INFO(Sp::video_logger, frame0_->ToString());
+		//LOG4CXX_INFO(Sp::video_logger, frame1_->ToString());
+		if(result_!=NULL)
+			LOG4CXX_INFO(Sp::video_logger, result_->ToString());
+		/*
 		est_->Estimate();
 		LOG4CXX_INFO(Sp::video_logger, "(" << frame0_->Get(511, 0) << "-"
 				<< frame0_->Get(511, 1) << ") --> (" << frame1_->Get(113, 0)
 				<< "-" << frame1_->Get(113, 1) << ") = " << est_->Cf0f1()->Get(
 				511, 113) << "    " << result_->Get(511, 113));
+				*/
+
 	}
 
 	void testSort() {
@@ -449,6 +483,6 @@ public:
 	}
 };
 
-CPPUNIT_TEST_SUITE_REGISTRATION( HostACOPTVEstimatorTest);
+CPPUNIT_TEST_SUITE_REGISTRATION( ACOPTVEstimatorTest);
 
 #endif /* ACO_PTV_TEST_HPP_ */
