@@ -17,6 +17,7 @@
 #include <ships/io/io.hpp>
 #include <ships/video/video.hpp>
 #include "aco_ptv_test.hpp"
+#include "aco_ptv_test_simple.hpp"
 
 int main(int argc, char **argv) {
 	Sp::ShipsConfig::Instance().Config();

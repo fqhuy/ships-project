@@ -59,8 +59,7 @@ void Program::AddKernel(cl::Kernel kernel, const std::string& name) {
 	//	LOG4CXX_ERROR(core_logger, "error in getting kernel info, error code is: "<<err);
 
 	//LOG4CXX_INFO(core_logger, "adding kernel : " << str);
-	this->kernels_.insert(std::pair<std::string, cl::Kernel>(name,
-			kernel));
+	this->kernels_.insert(std::pair<std::string, cl::Kernel>(name, kernel));
 }
 
 int Program::Build(const cl::Context& context) {
@@ -71,14 +70,14 @@ int Program::Build(const cl::Context& context) {
 	std::string* sourceCode;
 	for (int i = 0; i < includes_.size(); i++) {
 		sourceFile = new std::ifstream(includes_[i].c_str());
-		sourceCode = new std::string(std::istreambuf_iterator<char>(*sourceFile),
+		sourceCode = new std::string(
+				std::istreambuf_iterator<char>(*sourceFile),
 				(std::istreambuf_iterator<char>()));
 
 		allCode->append(*sourceCode);
 	}
 	int err;
-	sources.push_back(std::make_pair(allCode->c_str(),
-			allCode->length() + 1));
+	sources.push_back(std::make_pair(allCode->c_str(), allCode->length() + 1));
 
 	program_ = cl::Program(context, sources, &err);
 	if (err != CL_SUCCESS) {
@@ -91,8 +90,12 @@ int Program::Build(const cl::Context& context) {
 	err = program_.build(devices);
 
 	if (err != CL_SUCCESS) {
-		LOG4CXX_ERROR(core_logger, "unable to build program " << name_
-				<< "error code is " << err);
+		if (err == CL_BUILD_PROGRAM_FAILURE) {
+			std::string elog = program_.getBuildInfo<CL_PROGRAM_BUILD_LOG> (
+					devices[0]);
+			LOG4CXX_ERROR(core_logger, "unable to build program " << name_
+					<< "error code is " << err <<" ,error log: \n" << elog);
+		}
 		return err;
 	}
 
@@ -103,7 +106,7 @@ cl::Kernel* Program::FindKernel(const std::string& name) {
 	std::map<std::string, cl::Kernel>::iterator it;
 
 	it = this->kernels_.find(name);
-	if (it == this->kernels_.end()){
+	if (it == this->kernels_.end()) {
 		return NULL;
 	}
 	return &it->second;
@@ -150,7 +153,7 @@ void DeviceManager::ReadProgram(Program* prg, const TiXmlHandle& root) {
 	prg->Build(this->GetDefaultContext());
 
 	pElem = root.FirstChild("sp:kernel").Element();
-	if (!pElem){
+	if (!pElem) {
 		LOG4CXX_WARN(core_logger,"no kernel has been found! ");
 		return;
 	}

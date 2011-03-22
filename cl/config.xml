@@ -19,11 +19,24 @@
 		modified="2001-12-31T12:00:00" name="video" vendor="ships-project.org" version="0.1">
 		<sp:program name="aco_ptv">
 			<sp:kernel name="distances" ></sp:kernel>
-			<sp:kernel name="sort" ></sp:kernel>
+			<sp:kernel name="clusters" ></sp:kernel>
+			<sp:kernel name="zeros" />
 			<sp:include>ships.video.aco_ptv</sp:include>
 			<sp:requirements>
 			</sp:requirements>
 		</sp:program>
 
 	</sp:package>
+<!--	<sp:package created="2001-12-31T12:00:00"-->
+<!--		modified="2001-12-31T12:00:00" name="matrix" vendor="ships-project.org" version="0.1">-->
+<!--		<sp:program name="radix_sort">-->
+<!--			<sp:kernel name="radixSortBlocksKeysOnly" /><sp:kernel-->
+<!--				name="rank4" /><sp:kernel name="findRadixOffsets" /><sp:kernel-->
+<!--				name="scanNaive" /><sp:kernel name="reorderDataKeysOnly" />-->
+<!--			<sp:include>ships.core.matrix.radix_sort</sp:include>-->
+<!--			<sp:include>ships.core.matrix.scan_b</sp:include>-->
+<!--			<sp:requirements>-->
+<!--			</sp:requirements>-->
+<!--		</sp:program>-->
+<!--	</sp:package>comment-->
 </sp:package>

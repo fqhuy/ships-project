@@ -68,9 +68,6 @@ public:
 	}
 
 	virtual ~Array() {
-
-		//delete []steps_;
-		//delete []dims_;
 		delete memory_model_;
 		data_ = NULL;
 	}
@@ -83,6 +80,9 @@ public:
 	virtual bool IsMapped(){
 		return memory_model_->IsMapped();
 	}
+
+	virtual void Map();
+	virtual void UnMap();
 
 	SHIPS_INLINE
 	uint32_t GetWidth() {

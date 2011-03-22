@@ -26,10 +26,10 @@ template<> struct Type2Const<uint16_t>{
 	enum {type = CL_UNSIGNED_INT16, norm_type = CL_UNORM_INT16};
 };
 template<> struct Type2Const<int32_t>{
-	enum {type = CL_SIGNED_INT32, norm_type = CL_SNORM_INT8};
+	enum {type = CL_SIGNED_INT32, norm_type = CL_UNORM_INT_101010};
 };
 template<> struct Type2Const<uint32_t>{
-	enum {type = CL_UNSIGNED_INT32, norm_type = CL_UNORM_INT8};
+	enum {type = CL_UNSIGNED_INT32, norm_type = CL_UNORM_INT_101010};
 };
 template<> struct Type2Const<float>{
 	enum {type = CL_FLOAT};

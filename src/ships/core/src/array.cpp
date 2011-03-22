@@ -13,7 +13,10 @@ namespace Sp {
 	template void Array<T>::Resize(uint32_t* dims); \
 	template Array<T>* Array<T>::Clone(); \
 	template Array<T>& Array<T>::Assign(const Array<T>& array); \
+	template void Array<T>::Map(); \
+	template void Array<T>::UnMap(); \
 	template std::string Array<T>::ToString();
+
 INSTANTIATE_ARRAY(int8_t)
 ;
 INSTANTIATE_ARRAY(uint8_t)
@@ -138,6 +141,20 @@ template<class T> std::string Array<T>::ToString() {
 		oss << endl;
 	}
 	return oss.str();
+}
+
+template<class T> void Array<T>::Map(){
+	//TODO: temporary solution. it's better to create separate function than reuse Init()
+	if(this->IsMapped())
+		return;
+	this->data_ = this->memory_model_->Map();
+	Init(this->num_dims_, this->dims_, this->memory_model_, false);
+}
+
+template<class T> void Array<T>::UnMap(){
+	if(!this->IsMapped())
+		return;
+	this->memory_model_->UnMap();
 }
 
 }

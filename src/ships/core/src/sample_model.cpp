@@ -49,7 +49,7 @@ template<class T> Array<T>* PixelInterleavedSampleModel<T>::CreateArray(
 		imf.image_channel_data_type = Type2Const<T>::type;
 		switch (this->num_channels_) {
 		case 1:
-			imf.image_channel_order = CL_A;
+			imf.image_channel_order = CL_R;
 			break;
 		case 2:
 			imf.image_channel_order = CL_RG;

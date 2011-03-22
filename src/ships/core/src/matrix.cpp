@@ -100,7 +100,7 @@ template<class T1, class T2> Matrix<T1, T2>::Matrix(const uint32_t& width,
 	dims[0] = width;
 	dims[1] = height;
 	this->sample_model_ = new PixelInterleavedSampleModel<T1>(1, 2, dims);
-	MemoryModel<T2>* memory_model = new MemoryModel<T2>(2,true,true, sizeof(T2), READ_WRITE);
+	MemoryModel<T2>* memory_model = new MemoryModel<T2>(2,true,true, 1, READ_WRITE);
 	this->array_ = this->sample_model_->CreateArray(memory_model);
 }
 

@@ -210,7 +210,6 @@ template<class T> MemoryModel<T>* MemoryModel<T>::Clone(){
 template<class T> T*  MemoryModel<T>::CreateArray(const uint32_t& num_dims, uint32_t dims[SP_MAX_NUM_DIMENSIONS]){
 	if(!this->context_())
 		this->context_ = DeviceManager::Instance().GetDefaultContext();
-
 	int err=0;
 	int size = this->CalculateBufferSize(num_dims,dims);
 
@@ -267,6 +266,7 @@ template<class T> T* MemoryModel<T>::Map(int32_t x, int32_t y, uint32_t width, u
 
 	cl::size_t<3> region, origin;
 	int err=0;
+	//TODO: beware of this
 	origin[0] = origin[1] = origin[2] = 0;
 	region[0] = width; region[1] = height; region[2] = 1;
 	::size_t row_pitch =0, slice_pitch=0;
@@ -303,8 +303,9 @@ template<class T> T* MemoryModel<T>::Map(int32_t offset, size_t size){
 template<class T> T* MemoryModel<T>::Map(){
 	if(this->num_dims_==1)
 		return this->Map(0,this->dims_[0]);
-	else if(this->num_dims_==2)
+	else if(this->num_dims_==2){
 		return this->Map(0,0,this->dims_[0],this->dims_[1]);
+	}
 	return NULL;
 }
 
@@ -312,6 +313,8 @@ template<class T> void MemoryModel<T>::UnMap(){
 	if(!this->mapped_)
 		return;
 	this->queue_.enqueueUnmapMemObject(this->memory_, this->mapped_memory_);
+	//*************************
+	this->queue_.finish();
 	this->mapped_ = false;
 }
 

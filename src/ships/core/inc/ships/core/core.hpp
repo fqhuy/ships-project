@@ -43,6 +43,7 @@
 #include "geometry_3d.hpp"
 #include "pixel.hpp"
 #include "memory_model.hpp"
+#include "execution_model.hpp"
 #include "array.hpp"
 #include "sample_model.hpp"
 #include "metadata.hpp"
@@ -50,6 +51,7 @@
 #include "matrix.hpp"
 #include "image.hpp"
 #include "operations.hpp"
+#include "matrix_operations.hpp"
 #include "timer.hpp"
 
 namespace Sp {
