@@ -23,7 +23,7 @@ public:
 				num_particles, num_ants, num_loops) {
 
 		tau_ = new HostMatrix<float, float> (num_particles, num_particles);
-		this->N_ = new HostVector<bool, bool> (this->num_particles_);
+		this->N_ = new HostVector<int, int> (this->num_particles_);
 	}
 
 	virtual ~HostACOPTVEstimator() {

@@ -16,7 +16,7 @@ Matrix<int, int>* ACOPTVEstimator::Estimate() {
 	if (this->f0_->GetHeight() != this->f1_->GetHeight())
 		return NULL;
 	/*-----------------------------Initialize matrices------------------------------------------------*/
-	this->N_->Init(true);
+	this->N_->Init(1);
 
 	this->tau_->Init(this->tau0_);
 

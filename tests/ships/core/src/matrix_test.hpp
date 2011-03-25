@@ -53,7 +53,7 @@ class MatrixTest: public CppUnit::TestFixture {
 		}
 		void testGet(){
 			testSet();
-			LOG4CXX_INFO(Sp::core_logger, matrix_->ToString());
+			//LOG4CXX_INFO(Sp::core_logger, matrix_->ToString());
 			for(int i=0;i<height_;i++)
 				for(int j=0;j<width_;j++){
 					CPPUNIT_ASSERT(matrix_->Get(i,j)==i+j);
@@ -68,7 +68,7 @@ class MatrixTest: public CppUnit::TestFixture {
 			Sp::Matrix<float,float>* clone = NULL;
 			clone = matrix_->Clone();
 
-			LOG4CXX_INFO(Sp::core_logger, clone->ToString());
+			//LOG4CXX_INFO(Sp::core_logger, clone->ToString());
 			if(clone)
 				delete clone;
 		}

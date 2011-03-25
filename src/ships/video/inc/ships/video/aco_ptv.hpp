@@ -102,7 +102,7 @@ protected:
 	/*
 	 * @brief is a list of particles. false = visited, true = unvisited.
 	 */
-	Vector<bool, bool>* N_;
+	Vector<int, int>* N_;
 	/*
 	 * clusters0_ matrix of clusters in frame 0. every row is a list of particles sorted decreasingly by distance from particle[row id] to particle[clusters0_[column id]]
 	 * clusters1_ matrix of clusters in frame 1.

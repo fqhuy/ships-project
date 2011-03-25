@@ -10,12 +10,33 @@
 namespace Sp {
 //static double Timer::deltaT(int iCounterID);
 
-template<> int Random::Next(int min, int max){
+template<> int Random::Next(int min, int max) {
 	return rand() % (max - min) + min;
 }
-double Timer::deltaT(int iCounterID ) {
+
+template<> void Random::NextN(int* array, const uint32_t& size, const int& min,
+		const int& max, const bool& duplicate) {
+	int i, j;
+	if (duplicate) {
+		for (i = 0; i < size; i++) {
+			array[i] = rand() % (max - min) + min;
+		}
+	} else {
+		for (i = 0; i < size; i++) {
+			array[i] = rand() % (max - min) + min;
+			for (j = 0; j < i; j++) {
+				if (array[i] == array[j]) {
+					i--;
+					break;
+				}
+			}
+		}
+	}
+}
+
+double Timer::deltaT(int iCounterID) {
 	//TODO: this file need modification to support Windows.
-    double DeltaT;
+	double DeltaT;
 
 	static struct timeval _NewTime; // new wall clock time (struct representation in seconds and microseconds)
 	static struct timeval _OldTime0; // old wall clock time 0(struct representation in seconds and microseconds)

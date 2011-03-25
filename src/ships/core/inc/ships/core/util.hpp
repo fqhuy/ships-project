@@ -20,6 +20,8 @@ public:
 
 	template<class T> T Next(T min, T max);
 
+	template<class T> void NextN(T* array, const uint32_t& size, const int& min, const int& max, const bool& duplicate);
+
 	void SRand(){
 		srand(time(NULL));
 	}
@@ -65,7 +67,6 @@ public:
 		oss << "\n";
 		return oss.str();
 	}
-
 	/*
 	 * @brief sort the numbers array using Quick Sort algorithm.
 	 */

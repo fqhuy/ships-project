@@ -58,7 +58,7 @@ int HostACOPTVEstimator::Next(int current_pos, float* probability, bool relaxati
 	//finding Eta
 	/*
 	 for (int i = 0; i < this->num_particles_; i++) {
-	 if (N_->Get(i) == true) {
+	 if (N_->Get(i) == 1) {
 	 //currently eta is calculated as reciprocal of the distance between two particles.
 	 //eta = 1 / this->cf0f1_->Get(current_pos, i);
 	 // comment out bellow line to use relaxation length. usually, we use conventional length for the 1st iteration. ***
@@ -75,11 +75,11 @@ int HostACOPTVEstimator::Next(int current_pos, float* probability, bool relaxati
 	//loop through all unvisited particles in second frame to find one with highest probability.
 	float max = 0, tauij;
 
-	//this loop can be speed up using the ordered matrix clusters01_.
+	//this loop can be speeded up using the ordered matrix clusters01_.
 	for (int i = 0; i < this->cluster01_max_/*this->num_particles*/; i++) {
 		cup = this->clusters01_->Get(current_pos, i);
 		//cup = i;
-		if (N_->Get(cup) == true) {
+		if (N_->Get(cup) == 1) {
 			if (relaxation)
 				eta = 1 / (this->RelaxationLength(current_pos, cup));
 			else
@@ -92,7 +92,6 @@ int HostACOPTVEstimator::Next(int current_pos, float* probability, bool relaxati
 				selected = cup;
 			}
 		}
-
 	}
 	if (max == 0) {
 		//LOG4CXX_WARN(Sp::video_logger, "Can not find any sufficient particle, consider changing the number of particles to look at..");
@@ -127,7 +126,7 @@ void HostACOPTVEstimator::Loop() {
 		int Tk1[na][np];
 
 		for (j = 0; j < na; j++) { //for every ant.
-			this->N_->Init(true);
+			this->N_->Init(1);
 			//init with index value
 			for (k = 0; k < np; k++)
 				Tk0[j][k] = k;
@@ -157,7 +156,7 @@ void HostACOPTVEstimator::Loop() {
 				//update the route
 				Tk1[j][k] = next;
 				//mark this particle as visited
-				this->N_->Set(false, next);
+				this->N_->Set(0, next);
 			}
 		}
 
@@ -200,7 +199,7 @@ void HostACOPTVEstimator::Loop() {
 			 }
 
 		}
-		//update pheromone on each portion
+		//update pheromone on each portion using best Lk
 
 		delta_tau = 1 / lbestLk;
 		for (k = 0; k < np; k++) {
@@ -290,7 +289,7 @@ void HostACOPTVEstimator::Cluster() {
 
 	//LOG4CXX_INFO(Sp::video_logger,clusters0_->ToString());
 	//LOG4CXX_INFO(Sp::video_logger,clusters1_->ToString());
-	//LOG4CXX_INFO(Sp::video_logger,clusters01_->ToString());
+	LOG4CXX_INFO(Sp::video_logger,clusters01_->ToString());
 
 	//LOG4CXX_INFO(Sp::video_logger,cf0_->ToString());
 	//LOG4CXX_INFO(Sp::video_logger,cf1_->ToString());

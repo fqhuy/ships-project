@@ -62,8 +62,8 @@ public:
 	}
 
 	SHIPS_INLINE
-	virtual Array<T2>* GetArray(){
-		return array_;
+	virtual Array<T2>& GetArray(){
+		return *array_;
 	}
 	SHIPS_INLINE
 	virtual uint32_t& GetSize(){
@@ -116,5 +116,40 @@ protected:
 private:
 };
 
+
+template<class T1, class T2> class DeviceVector: public Vector<T1, T2> {
+public:
+	typedef DeviceVector<T1, T2> SelfType;
+	typedef T1 ValueType1;
+	typedef T1& Reference1;
+	typedef const T1& ConstReference1;
+	typedef T1* Pointer1;
+
+	DeviceVector();
+
+	SHIPS_INLINE
+	DeviceVector(const uint32_t& size){
+		uint32_t s = size;
+		MemoryModel<T2>* mm = new DeviceMemoryModel<T2>(1);
+		Sp::SampleModel<T1,T2>* sm = new Sp::PixelInterleavedSampleModel<T1>(1,1,&s);
+		this->sample_model_ = sm;
+		this->size_ = size;
+		this->array_ = sm->CreateArray(mm);
+	}
+
+	virtual ~DeviceVector() {
+	}
+
+	//void Set(ValueType value, const uint32_t& index);
+	void Insert(const int& pos, ConstReference1 element);
+	void Resize(const int& size, const bool& preserve = true);
+	void Remove(const int& index);
+	void Init(ValueType1 value);
+	//---------- GET ----------//
+	//ValueType Get(const int& index);
+	//---------- GET ----------//
+protected:
+private:
+};
 }
 #endif // __SHIPS_CORE_VECTOR__

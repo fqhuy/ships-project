@@ -12,7 +12,8 @@
 class UtilTest: public CPPUNIT_NS::TestFixture {
 
 	CPPUNIT_TEST_SUITE( UtilTest );
-	CPPUNIT_TEST( testDeltaT );
+	//CPPUNIT_TEST( testDeltaT );
+	CPPUNIT_TEST( testNextN );
 	CPPUNIT_TEST_SUITE_END();
 
 private:
@@ -33,6 +34,15 @@ public:
 		LOG4CXX_INFO(Sp::core_logger, "elapsed time is: "<<e);
 	}
 
+	void testNextN(){
+		int a[10];
+
+		Sp::Random rd;
+		rd.NextN(a,10,0,10,false);
+
+		LOG4CXX_INFO(Sp::core_logger, Sp::ArrayUtils::ToString(a,10));
+	}
+
 };
-CPPUNIT_TEST_SUITE_REGISTRATION(UtilTest);
+//CPPUNIT_TEST_SUITE_REGISTRATION(UtilTest);
 #endif /* UTIL_TEST_HPP_ */

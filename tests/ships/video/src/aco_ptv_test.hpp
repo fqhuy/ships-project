@@ -167,10 +167,10 @@ public:
 	void testDistances() {
 		est_->AddFrame(frame0_);
 		est_->AddFrame(frame1_);
-		result_ = new Sp::Matrix<float,float>(SIZE,SIZE);
-		result_->Zeros();
+		//result_ = new Sp::Matrix<float,float>(SIZE,SIZE);
+		//result_->Zeros();
 		try{
-			est_->Distances(frame0_, frame1_, result_);
+			 result_ = est_->Distances(frame0_, frame1_);
 		} catch (...){
 			LOG4CXX_INFO(Sp::video_logger, "an error occured during distances calculation");
 		}
@@ -192,17 +192,22 @@ public:
 	void testSort() {
 		Sp::Matrix<int, int>* indices = NULL;
 		int max = cluster01_max;
-		if(mode==0)
-			indices = new Sp::HostMatrix<int, int>(max, SIZE);
+		if(mode==0){
+			indices = new Sp::HostMatrix<int, int>(SIZE, SIZE);
+			for(int i=0;i<SIZE;i++)
+				for(int j=0;j<SIZE;j++){
+					indices->Set(j,i,j);
+				}
+		}
 		else
 			indices = new Sp::Matrix<int, int> (max, SIZE);
 
 		est_->AddFrame(frame0_);
 		est_->AddFrame(frame1_);
 
-		result_ = new Sp::Matrix<float,float>(SIZE,SIZE);
+		//result_ = new Sp::Matrix<float,float>(SIZE,SIZE);
 		try{
-			est_->Distances(frame0_, frame1_, result_);
+			result_ = est_->Distances(frame0_, frame1_);
 			est_->Sort(result_, indices);
 		} catch (...){
 			LOG4CXX_INFO(Sp::video_logger, "an error occured during distances calculation");

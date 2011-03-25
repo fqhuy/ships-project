@@ -186,8 +186,8 @@ public:
 	typedef T* Pointer;
 
 	SHIPS_INLINE
-	DeviceMemoryModel(uint32_t num_dims, bool mapped = true,
-			bool pinned = false, uint8_t alignment=4,AccessModes access_mode = READ_WRITE)  :
+	DeviceMemoryModel(uint32_t num_dims, bool mapped = false,
+			bool pinned = true, uint8_t alignment=4,AccessModes access_mode = READ_WRITE)  :
 		Super(num_dims, mapped, pinned, alignment,access_mode) {
 	}
 

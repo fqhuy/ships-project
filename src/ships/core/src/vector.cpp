@@ -68,7 +68,7 @@ template<class T1, class T2> Vector<T1, T2>::Vector(){
 
 template<class T1, class T2> Vector<T1, T2>::Vector(const uint32_t& size) {
 	uint32_t s = size;
-	MemoryModel<T2>* mm = new MemoryModel<T2>(1,true,true,sizeof(T2),READ_WRITE);
+	MemoryModel<T2>* mm = new MemoryModel<T2>(1,true,true,1,READ_WRITE);
 	Sp::SampleModel<T1,T2>* sm = new Sp::PixelInterleavedSampleModel<T1>(1,1,&s);
 	this->sample_model_ = sm;
 	this->size_ = size;

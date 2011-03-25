@@ -68,6 +68,7 @@ int Program::Build(const cl::Context& context) {
 	std::ifstream* sourceFile;
 	std::string* allCode = new std::string("");
 	std::string* sourceCode;
+
 	for (int i = 0; i < includes_.size(); i++) {
 		sourceFile = new std::ifstream(includes_[i].c_str());
 		sourceCode = new std::string(
@@ -75,6 +76,9 @@ int Program::Build(const cl::Context& context) {
 				(std::istreambuf_iterator<char>()));
 
 		allCode->append(*sourceCode);
+
+		delete sourceFile;
+		delete sourceCode;
 	}
 	int err;
 	sources.push_back(std::make_pair(allCode->c_str(), allCode->length() + 1));
@@ -87,8 +91,11 @@ int Program::Build(const cl::Context& context) {
 	}
 	std::vector<cl::Device> devices;
 	context.getInfo(CL_CONTEXT_DEVICES, &devices);
-	err = program_.build(devices);
-
+	try{
+		err = program_.build(devices);
+	} catch (...){
+		LOG4CXX_ERROR(Sp::core_logger, "an error occured during building program: "<<this->name_);
+	}
 	if (err != CL_SUCCESS) {
 		if (err == CL_BUILD_PROGRAM_FAILURE) {
 			std::string elog = program_.getBuildInfo<CL_PROGRAM_BUILD_LOG> (
@@ -98,6 +105,9 @@ int Program::Build(const cl::Context& context) {
 		}
 		return err;
 	}
+
+	delete allCode;
+	//delete sourceFile;
 
 	return 0;
 }
