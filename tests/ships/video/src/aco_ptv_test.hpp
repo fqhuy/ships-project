@@ -104,29 +104,35 @@ public:
 			frame0_ = new Sp::HostMatrix<float, float>(DIM, SIZE);
 			frame1_ = new Sp::HostMatrix<float, float>(DIM, SIZE);
 		} else if (mode == 1) {
-			uint32_t dims1[]  = {DIM, SIZE};
-			uint32_t dims2[]  = {DIM, SIZE};
+			uint32_t dims1[] = { DIM, SIZE };
+			uint32_t dims2[] = { DIM, SIZE };
 
-			Sp::SampleModel<float,float>* sm1 = new Sp::PixelInterleavedSampleModel<float>(1,2,dims1);
-			Sp::SampleModel<float,float>* sm2 = new Sp::PixelInterleavedSampleModel<float>(1,2,dims2);
+			Sp::SampleModel<float, float>* sm1 =
+					new Sp::PixelInterleavedSampleModel<float>(1, 2, dims1);
+			Sp::SampleModel<float, float>* sm2 =
+					new Sp::PixelInterleavedSampleModel<float>(1, 2, dims2);
 
-			Sp::MemoryModel<float>* mm1 = new Sp::MemoryModel<float>(1,true,true,2,Sp::READ);
-			Sp::MemoryModel<float>* mm2 = new Sp::MemoryModel<float>(1,true,true,2,Sp::READ);
+			Sp::MemoryModel<float>* mm1 = new Sp::MemoryModel<float>(1, true,
+					true, 2, Sp::READ);
+			Sp::MemoryModel<float>* mm2 = new Sp::MemoryModel<float>(1, true,
+					true, 2, Sp::READ);
 
-			frame0_ = new Sp::Matrix<float,float>(DIM,SIZE,mm1,sm1);
-			frame1_ = new Sp::Matrix<float,float>(DIM,SIZE,mm2,sm2);
+			frame0_ = new Sp::Matrix<float, float>(DIM, SIZE, mm1, sm1);
+			frame1_ = new Sp::Matrix<float, float>(DIM, SIZE, mm2, sm2);
 
 		}
 
 		reader_.ReadAsFloatMatrix(file0_, frame0_);
 		reader_.ReadAsFloatMatrix(file1_, frame1_);
 
-		if(mode==0){
+		if (mode == 0) {
 			est_ = new Sp::HostACOPTVEstimator(alpha, beta, rho, tau0,
-				cluster_size, cluster_max, cluster01_max, num_particles,
-				num_ants, num_loops);
-		} else if(mode==1) {
-			est_ = new Sp::ParallelACOPTVEstimator(alpha,beta,rho,tau0,cluster_size,cluster_max,cluster01_max,num_particles,num_ants,num_loops);
+					cluster_size, cluster_max, cluster01_max, num_particles,
+					num_ants, num_loops);
+		} else if (mode == 1) {
+			est_ = new Sp::ParallelACOPTVEstimator(alpha, beta, rho, tau0,
+					cluster_size, cluster_max, cluster01_max, num_particles,
+					num_ants, num_loops);
 		}
 
 	}
@@ -141,9 +147,9 @@ public:
 
 		if (test == "testCluster")
 			testCluster();
-		else if(test == "testSort")
+		else if (test == "testSort")
 			testSort();
-		else if(test == "testDistances")
+		else if (test == "testDistances")
 			testDistances();
 		else if (test == "testDrawCluster") {
 			int a = ships["a"];
@@ -167,57 +173,69 @@ public:
 	void testDistances() {
 		est_->AddFrame(frame0_);
 		est_->AddFrame(frame1_);
-		//result_ = new Sp::Matrix<float,float>(SIZE,SIZE);
+
+		result_ = new Sp::Matrix<float,float>(SIZE,SIZE);
 		//result_->Zeros();
-		try{
-			 result_ = est_->Distances(frame0_, frame1_);
-		} catch (...){
-			LOG4CXX_INFO(Sp::video_logger, "an error occured during distances calculation");
+		try {
+			est_->Distances(frame0_, frame0_, result_);
+		} catch (...) {
+			LOG4CXX_INFO(Sp::video_logger,
+					"an error occured during distances calculation");
 		}
 
 		///LOG4CXX_INFO(Sp::video_logger, frame0_->ToString());
 		//LOG4CXX_INFO(Sp::video_logger, frame1_->ToString());
-		if(result_!=NULL)
+		if (result_ != NULL){
+			if(!result_->IsMapped())
+				result_->GetArray().Map();
+
 			LOG4CXX_INFO(Sp::video_logger, result_->ToString());
+
+		}
 		/*
-		est_->Estimate();
-		LOG4CXX_INFO(Sp::video_logger, "(" << frame0_->Get(511, 0) << "-"
-				<< frame0_->Get(511, 1) << ") --> (" << frame1_->Get(113, 0)
-				<< "-" << frame1_->Get(113, 1) << ") = " << est_->Cf0f1()->Get(
-				511, 113) << "    " << result_->Get(511, 113));
-				*/
+		 est_->Estimate();
+		 LOG4CXX_INFO(Sp::video_logger, "(" << frame0_->Get(511, 0) << "-"
+		 << frame0_->Get(511, 1) << ") --> (" << frame1_->Get(113, 0)
+		 << "-" << frame1_->Get(113, 1) << ") = " << est_->Cf0f1()->Get(
+		 511, 113) << "    " << result_->Get(511, 113));
+		 */
 
 	}
 
 	void testSort() {
 		Sp::Matrix<int, int>* indices = NULL;
 		int max = cluster01_max;
-		if(mode==0){
+		if (mode == 0) {
 			indices = new Sp::HostMatrix<int, int>(SIZE, SIZE);
-			for(int i=0;i<SIZE;i++)
-				for(int j=0;j<SIZE;j++){
-					indices->Set(j,i,j);
+			for (int i = 0; i < SIZE; i++)
+				for (int j = 0; j < SIZE; j++) {
+					indices->Set(j, i, j);
 				}
-		}
-		else
-			indices = new Sp::Matrix<int, int> (max, SIZE);
+		} else
+			indices = new Sp::Matrix<int, int>(max, SIZE);
 
 		est_->AddFrame(frame0_);
 		est_->AddFrame(frame1_);
 
 		//result_ = new Sp::Matrix<float,float>(SIZE,SIZE);
-		try{
-			result_ = est_->Distances(frame0_, frame1_);
+		try {
+			result_ = est_->Distances(frame0_, frame0_);
 			est_->Sort(result_, indices);
-		} catch (...){
-			LOG4CXX_INFO(Sp::video_logger, "an error occured during distances calculation");
+		} catch (...) {
+			LOG4CXX_INFO(Sp::video_logger,
+					"an error occured during distances calculation");
 		}
 
 		//LOG4CXX_INFO(Sp::video_logger, result_->ToString());
-		if(indices)
+		if (indices){
+			if(!indices->IsMapped())
+				indices->GetArray().Map();
+
 			LOG4CXX_INFO(Sp::video_logger, indices->ToString());
 
-		if(indices)
+		}
+
+		if (indices)
 			delete indices;
 	}
 	void testEstimateN() {
@@ -238,10 +256,18 @@ public:
 	void testEstimate() {
 		est_->AddFrame(frame0_);
 		est_->AddFrame(frame1_);
-		iresult_ = est_->Estimate();
-		//LOG4CXX_INFO(Sp::video_logger,"estimating the motion vectors..");
+		try {
+			iresult_ = est_->Estimate();
+		} catch (std::exception& e) {
+			LOG4CXX_ERROR(Sp::video_logger,
+					"an error occurred during estimation " << e.what());
+		}
+
+		if (iresult_)
+			LOG4CXX_INFO(Sp::video_logger, iresult_->ToString());
+
 		CPPUNIT_ASSERT(iresult_ != NULL);
-		if (iresult_) {
+		if (false) {
 			int ok = 0, nok = 0, id = 0;
 
 			try {
@@ -388,14 +414,33 @@ public:
 		est_->AddFrame(frame0_);
 		est_->AddFrame(frame1_);
 		est_->Estimate();
-		//int a = 325, b = 400;
-		float rlength1 = est_->RelaxationLength(a, a);
-		float rlength2 = est_->RelaxationLength(a, b);
 
-		float length1 = est_->Cf0f1()->Get(a, a);
-		float length2 = est_->Cf0f1()->Get(a, b);
-		LOG4CXX_INFO(Sp::video_logger, length1 << " vs " << length2 << " ---- "
-				<< rlength1 << " vs " << rlength2);
+		if (mode == 0) {
+			/*
+			float rlength1 = est_->RelaxationLength(a, a);
+			float rlength2 = est_->RelaxationLength(a, b);
+
+			float length1 = est_->Cf0f1()->Get(a, a);
+			float length2 = est_->Cf0f1()->Get(a, b);
+			LOG4CXX_INFO(Sp::video_logger, length1 << " vs " << length2
+					<< " ---- " << rlength1 << " vs " << rlength2);
+			*/
+			Sp::HostVector<float,float> re(num_particles);
+			for(int i=0;i<num_particles;i++){
+				re.Set(est_->RelaxationLength(i,i), i);
+			}
+			LOG4CXX_INFO(Sp::video_logger,re.ToString());
+		} else {
+
+			try{
+				this->result_ = ((Sp::ParallelACOPTVEstimator*) est_)->RDistances();
+			}catch(std::exception& e){
+				LOG4CXX_ERROR(Sp::video_logger,e.what());
+			}
+
+			if (result_)
+				LOG4CXX_INFO(Sp::video_logger, result_->ToString());
+		}
 	}
 
 	void testCluster() {
@@ -403,7 +448,12 @@ public:
 		est_->AddFrame(frame1_);
 		est_->Estimate();
 		//std::ostringstream oss;
-		Sp::Matrix<int, int>* clusters01 = est_->Clusters01();
+
+		Sp::Matrix<int, int>* clusters01 = est_->Clusters0();
+		if(!clusters01->IsMapped())
+			clusters01->GetArray().Map();
+		LOG4CXX_INFO(Sp::core_logger,clusters01->ToString());
+/*
 		bool flag = false;
 		int i, j;
 		for (i = 0; i < SIZE; i++) {
@@ -423,6 +473,7 @@ public:
 			}
 
 		}
+		*/
 	}
 
 	void testDrawCluster(const int& p0, const int& p1) {

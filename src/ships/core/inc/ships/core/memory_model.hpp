@@ -18,10 +18,13 @@ template<class T> class MemoryModel{
 public:
 	typedef T ValueType;
 	typedef T* Pointer;
+	SHIPS_INLINE
+	MemoryModel(){
 
+	}
 	SHIPS_INLINE
 	MemoryModel(uint32_t num_dims, bool mapped = true,
-			bool pinned = false, uint8_t alignment=4,AccessModes access_mode = READ_WRITE) :
+			bool pinned = false, uint8_t alignment=1,AccessModes access_mode = READ_WRITE) :
 		num_dims_(num_dims), mapped_(mapped), alignment_(alignment), access_mode_(access_mode),
 				pinned_(pinned), mapped_memory_(NULL), flag_(0) {
 		dims_[0] = dims_[1] = dims_[2] = 1;
@@ -151,9 +154,9 @@ protected:
 	cl_mem_flags flag_;
 
 	uint32_t CalculateBufferSize(const uint32_t& num_dims, const uint32_t dims[]);
-
-private:
 	bool pinned_;
+private:
+
 };
 
 template<class T> class HostMemoryModel: public MemoryModel<T> {
@@ -162,7 +165,7 @@ public:
 	typedef T* Pointer;
 	typedef MemoryModel<T> Super;
 	SHIPS_INLINE
-	HostMemoryModel(uint32_t num_dims, uint8_t alignment=4) :
+	HostMemoryModel(uint32_t num_dims, uint8_t alignment=1) :
 		Super(num_dims, false, false, alignment) {
 	}
 	virtual ~HostMemoryModel() {
@@ -186,9 +189,24 @@ public:
 	typedef T* Pointer;
 
 	SHIPS_INLINE
-	DeviceMemoryModel(uint32_t num_dims, bool mapped = false,
-			bool pinned = true, uint8_t alignment=4,AccessModes access_mode = READ_WRITE)  :
-		Super(num_dims, mapped, pinned, alignment,access_mode) {
+	DeviceMemoryModel(uint32_t num_dims, uint8_t alignment=1,AccessModes access_mode = READ_WRITE){
+		this->dims_[0] = this->dims_[1] = this->dims_[2] = 1;
+		this->mapped_ = false;
+		this->pinned_ = false;
+		this->num_dims_ = num_dims;
+		this->alignment_ = alignment;
+		this->access_mode_ = access_mode;
+		this->mapped_memory_ = NULL;
+		this->flag_ = 0;
+
+		if(this->access_mode_==READ)
+			this->flag_=this->flag_|CL_MEM_READ_ONLY;
+
+		if(this->access_mode_==READ_WRITE)
+			this->flag_=this->flag_|CL_MEM_READ_WRITE;
+
+		if(this->access_mode_==WRITE)
+			this->flag_=this->flag_|CL_MEM_WRITE_ONLY;
 	}
 
 	virtual ~DeviceMemoryModel() {
@@ -198,8 +216,8 @@ public:
 	Pointer Map();
 	//void UnMap();
 
-	Pointer CreateArray(uint32_t width);
-	//virtual void* CreateArray(size_t width, size_t height);
+	//Pointer CreateArray(uint32_t width);
+	//void* CreateArray(size_t width, size_t height);
 	//virtual void* CreateArray(size_t width, size_t height, size_t depth);
 private:
 	typedef MemoryModel<T> Super;

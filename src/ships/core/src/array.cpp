@@ -16,7 +16,6 @@ namespace Sp {
 	template void Array<T>::Map(); \
 	template void Array<T>::UnMap(); \
 	template std::string Array<T>::ToString();
-
 INSTANTIATE_ARRAY(int8_t)
 ;
 INSTANTIATE_ARRAY(uint8_t)
@@ -67,9 +66,9 @@ template<class T> void Array<T>::Init(uint32_t num_dims, uint32_t* dims,
 		switch (num_dims) {
 		case 1:
 			data_ = memory_model_->CreateArray(dims[0]);
-			if (data_ == NULL)
-				LOG4CXX_ERROR(Sp::core_logger, "array.cpp: error in creating data_")
-			;
+			//if (data_ == NULL)
+			//	LOG4CXX_ERROR(Sp::core_logger, "array.cpp: error in creating data_")
+			//;
 			break;
 		case 2:
 			// TODO: fix this
@@ -91,40 +90,44 @@ template<class T> void Array<T>::Init(uint32_t num_dims, uint32_t* dims,
 		width_ = dims[0];
 		height_ = dims[1];
 		depth_ = 0;
-
-		data2d_ = new T*[height_];
-		for (int i = 0; i < height_; i++) {
-			data2d_[i] = data_;
-			data2d_[i] = data2d_[i] + width_ * i;
+		if (data_) {
+			data2d_ = new T*[height_];
+			for (int i = 0; i < height_; i++) {
+				data2d_[i] = data_;
+				data2d_[i] = data2d_[i] + width_ * i;
+			}
 		}
 
 	} else if (num_dims == 3) {
 		width_ = dims[0];
 		height_ = dims[1];
 		depth_ = dims[2];
-
-		data3d_ = new T**[depth_];
-		for (int i = 0; i < depth_; i++) {
-			data3d_[i] = new T*[height_];
-			for (int j = 0; j < height_; j++) {
-				data3d_[i][j] = data_;
-				data3d_[i][j] = data3d_[i][j] + width_ * height_ * i + width_
-						* j;
+		if (data_) {
+			data3d_ = new T**[depth_];
+			for (int i = 0; i < depth_; i++) {
+				data3d_[i] = new T*[height_];
+				for (int j = 0; j < height_; j++) {
+					data3d_[i][j] = data_;
+					data3d_[i][j] = data3d_[i][j] + width_ * height_ * i
+							+ width_ * j;
+				}
 			}
 		}
 	}
 
 	//steps_ = new uint32_t[num_dims];
-	ArrayUtils::initArray((uint32_t) 0, (uint32_t) SP_MAX_NUM_DIMENSIONS,
-			(uint32_t) 0, steps_);
-	int total = 1;
-	int i;
-	for (i = 0; i < num_dims; i++) {
-		total *= dims[i];
-	}
-	steps_[0] = total / dims[num_dims - 1];
-	for (i = 1; i < num_dims; i++) {
-		steps_[i] = steps_[i - 1] / dims[num_dims - i - 1];
+	if (data_) {
+		ArrayUtils::initArray((uint32_t) 0, (uint32_t) SP_MAX_NUM_DIMENSIONS,
+				(uint32_t) 0, steps_);
+		int total = 1;
+		int i;
+		for (i = 0; i < num_dims; i++) {
+			total *= dims[i];
+		}
+		steps_[0] = total / dims[num_dims - 1];
+		for (i = 1; i < num_dims; i++) {
+			steps_[i] = steps_[i - 1] / dims[num_dims - i - 1];
+		}
 	}
 }
 
@@ -143,16 +146,16 @@ template<class T> std::string Array<T>::ToString() {
 	return oss.str();
 }
 
-template<class T> void Array<T>::Map(){
+template<class T> void Array<T>::Map() {
 	//TODO: temporary solution. it's better to create separate function than reuse Init()
-	if(this->IsMapped())
+	if (this->IsMapped())
 		return;
 	this->data_ = this->memory_model_->Map();
 	Init(this->num_dims_, this->dims_, this->memory_model_, false);
 }
 
-template<class T> void Array<T>::UnMap(){
-	if(!this->IsMapped())
+template<class T> void Array<T>::UnMap() {
+	if (!this->IsMapped())
 		return;
 	this->memory_model_->UnMap();
 }

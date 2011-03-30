@@ -13,18 +13,24 @@ void ParallelACOPTVEstimator::Loop() {
 	int na = this->num_ants_;
 	int nl = this->num_loops_;
 
+	HostVector<int, int> initPos(na);
+
 	cl::Kernel* kernel = DeviceManager::Instance().FindKernel(
 			"ships.video.aco_ptv.one_step");
 	cl::Kernel* kernel1 = DeviceManager::Instance().FindKernel(
 			"ships.video.aco_ptv.update");
+	cl::Kernel* kernel2 = DeviceManager::Instance().FindKernel(
+			"ships.video.aco_ptv.update_rho");
 
 	if (kernel == NULL)
-		throw new InvalidKernelException();
+		throw InvalidKernelException();
 	if (kernel1 == NULL)
-		throw new InvalidKernelException();
+		throw InvalidKernelException();
+	if(kernel2 == NULL)
+		throw InvalidKernelException();
 
 	int gx = this->num_particles_;
-	int gy = this->num_threads_ / this->num_particles_;
+	int	gy =(this->num_particles_ * this->num_ants_) <= this->num_threads_ ? this->num_ants_ : this->num_threads_ / this->num_particles_;
 
 	int lx = gx / this->num_blocks_;
 	int ly = gy;
@@ -32,15 +38,20 @@ void ParallelACOPTVEstimator::Loop() {
 	cl::NDRange global(gx, gy);
 	cl::NDRange local(lx, ly);
 
+	this->tau_->GetArray().UnMap();
+	//Lk.GetArray().UnMap();
+	this->N_->GetArray().UnMap();
+	this->f0_->GetArray().UnMap();
+	this->f1_->GetArray().UnMap();
+
 	for (i = 0; i < nl; i++) { //for nl number of loops.
-		rd.SRand();
+		//rd.SRand();
 
-		if (this->cluster_size_ < this->cluster_max_)
-			this->cluster_size_++;
+		//if (this->cluster_size_ < this->cluster_max_)
+		//	this->cluster_size_++;
 
-		Vector<int, int> initPos(na);
-		Vector<int, int> Tk0(np);
-		Vector<int, int> Tk1(np);
+		Vector<int, int> Tk0(np * na);
+		Vector<int, int> Tk1(np * na);
 		Vector<float, float> Lk(na);
 
 		//generate random init positions.
@@ -48,82 +59,68 @@ void ParallelACOPTVEstimator::Loop() {
 
 		//init start positions for each ant.
 		for (j = 0; j < na; j++) {
+			Lk.Set(2, j);
 			for (k = 0; k < np; k++) {
 				Tk0.Set((k + this->num_particles_ - initPos.Get(j))
 						% this->num_particles_, j * np + k);
 				Tk1.Set(0, j * np + k);
 			}
 		}
-		initPos.GetArray().UnMap();
+
+		//LOG4CXX_INFO(Sp::video_logger,Lk.ToString());
+		this->Init(this->N_,"init_bufferi",1,this->num_particles_,this->num_ants_);
+		Lk.GetArray().UnMap();
+		//initPos.GetArray().UnMap();
 		Tk0.GetArray().UnMap();
 		Tk1.GetArray().UnMap();
-		Lk.GetArray().UnMap();
 
 		{//run one_step kernel
 			err = kernel->setArg(0,
-					this->clusters0_->GetArray().GetMemoryModel().GetImage2D());
-			if (err != CL_SUCCESS)
-				LOG4CXX_ERROR(video_logger,"error in setting kernel arg 0: "<<err);
-			err = kernel->setArg(1,
-					this->clusters1_->GetArray().GetMemoryModel().GetImage2D());
-			if (err != CL_SUCCESS)
-				LOG4CXX_ERROR(video_logger,"error in setting kernel arg 1: "<<err);
-			err
-					= kernel->setArg(
-							2,
-							this->clusters01_->GetArray().GetMemoryModel().GetImage2D());
-			if (err != CL_SUCCESS)
-				LOG4CXX_ERROR(video_logger,"error in setting kernel arg 2: "<<err);
-			err = kernel->setArg(3,
 					this->cf0f1_->GetArray().GetMemoryModel().GetImage2D());
 			if (err != CL_SUCCESS)
+				LOG4CXX_ERROR(video_logger,"error in setting kernel arg 0: "<<err);
+			err
+					= kernel->setArg(
+							1,
+							this->clusters01_->GetArray().GetMemoryModel().GetImage2D());
+			if (err != CL_SUCCESS)
+				LOG4CXX_ERROR(video_logger,"error in setting kernel arg 1: "<<err);
+			err = kernel->setArg(2,
+					this->tau_->GetArray().GetMemoryModel().GetBuffer());
+			if (err != CL_SUCCESS)
+				LOG4CXX_ERROR(video_logger,"error in setting kernel arg 2: "<<err);
+			err = kernel->setArg(3, Lk.GetArray().GetMemoryModel().GetBuffer());
+			if (err != CL_SUCCESS)
 				LOG4CXX_ERROR(video_logger,"error in setting kernel arg 3: "<<err);
-			err = kernel->setArg(4,
-					this->f0_->GetArray().GetMemoryModel().GetBuffer());
+			err
+					= kernel->setArg(4,
+							Tk0.GetArray().GetMemoryModel().GetBuffer());
 			if (err != CL_SUCCESS)
 				LOG4CXX_ERROR(video_logger,"error in setting kernel arg 4: "<<err);
-			err = kernel->setArg(5,
-					this->f1_->GetArray().GetMemoryModel().GetBuffer());
+			err
+					= kernel->setArg(5,
+							Tk1.GetArray().GetMemoryModel().GetBuffer());
 			if (err != CL_SUCCESS)
 				LOG4CXX_ERROR(video_logger,"error in setting kernel arg 5: "<<err);
 			err = kernel->setArg(6,
-					this->tau_->GetArray().GetMemoryModel().GetBuffer());
-			if (err != CL_SUCCESS)
-				LOG4CXX_ERROR(video_logger,"error in setting kernel arg 6: "<<err);
-			err = kernel->setArg(7, Lk.GetArray().GetMemoryModel().GetBuffer());
-			if (err != CL_SUCCESS)
-				LOG4CXX_ERROR(video_logger,"error in setting kernel arg 7: "<<err);
-			err = kernel->setArg(8,
-					Tk0.GetArray().GetMemoryModel().GetImage2D());
-			if (err != CL_SUCCESS)
-				LOG4CXX_ERROR(video_logger,"error in setting kernel arg 8: "<<err);
-			err = kernel->setArg(9,
-					Tk1.GetArray().GetMemoryModel().GetImage2D());
-			if (err != CL_SUCCESS)
-				LOG4CXX_ERROR(video_logger,"error in setting kernel arg 9: "<<err);
-			err = kernel->setArg(10,
-					initPos.GetArray().GetMemoryModel().GetBuffer());
-			if (err != CL_SUCCESS)
-				LOG4CXX_ERROR(video_logger,"error in setting kernel arg 10: "<<err);
-			err = kernel->setArg(11,
 					this->N_->GetArray().GetMemoryModel().GetBuffer());
 			if (err != CL_SUCCESS)
+				LOG4CXX_ERROR(video_logger,"error in setting kernel arg 6: "<<err);
+			err = kernel->setArg(7, this->num_particles_);
+			if (err != CL_SUCCESS)
+				LOG4CXX_ERROR(video_logger,"error in setting kernel arg 7: "<<err);
+			err = kernel->setArg(8, this->num_ants_);
+			if (err != CL_SUCCESS)
+				LOG4CXX_ERROR(video_logger,"error in setting kernel arg 8: "<<err);
+			err = kernel->setArg(9, this->cluster01_max_);
+			if (err != CL_SUCCESS)
+				LOG4CXX_ERROR(video_logger,"error in setting kernel arg 9: "<<err);
+			err = kernel->setArg(10, this->cluster_max_);
+			if (err != CL_SUCCESS)
+				LOG4CXX_ERROR(video_logger,"error in setting kernel arg 10: "<<err);
+			err = kernel->setArg(11, this->cluster_size_);
+			if (err != CL_SUCCESS)
 				LOG4CXX_ERROR(video_logger,"error in setting kernel arg 11: "<<err);
-			err = kernel->setArg(12, this->num_particles_);
-			if (err != CL_SUCCESS)
-				LOG4CXX_ERROR(video_logger,"error in setting kernel arg 12: "<<err);
-			err = kernel->setArg(13, this->num_ants_);
-			if (err != CL_SUCCESS)
-				LOG4CXX_ERROR(video_logger,"error in setting kernel arg 13: "<<err);
-			err = kernel->setArg(14, this->cluster01_max_);
-			if (err != CL_SUCCESS)
-				LOG4CXX_ERROR(video_logger,"error in setting kernel arg 14: "<<err);
-			err = kernel->setArg(15, this->cluster_max_);
-			if (err != CL_SUCCESS)
-				LOG4CXX_ERROR(video_logger,"error in setting kernel arg 15: "<<err);
-			err = kernel->setArg(16, this->cluster_size_);
-			if (err != CL_SUCCESS)
-				LOG4CXX_ERROR(video_logger,"error in setting kernel arg 16: "<<err);
 
 			err = this->queue_.enqueueNDRangeKernel(*kernel, cl::NullRange,
 					global, local);
@@ -133,7 +130,29 @@ void ParallelACOPTVEstimator::Loop() {
 			this->queue_.finish();
 
 		}
+		{//update tau matrix
+
+			err = kernel2->setArg(0,
+					this->tau_->GetArray().GetMemoryModel().GetBuffer());
+			if (err != CL_SUCCESS)
+				LOG4CXX_ERROR(video_logger,"error in setting kernel<2> arg 0: "<<err);
+			err = kernel2->setArg(1, this->num_particles_);
+			if (err != CL_SUCCESS)
+				LOG4CXX_ERROR(video_logger,"error in setting kernel<2> arg 1: "<<err);
+
+			err = this->queue_.enqueueNDRangeKernel(*kernel2, cl::NullRange,
+					cl::NDRange(this->num_particles_, this->num_threads_/ this->num_particles_),
+					cl::NDRange(this->num_particles_ / this->num_blocks_, this->num_threads_ / this->num_particles_));
+			if(err!=CL_SUCCESS)
+			{
+				LOG4CXX_ERROR(Sp::video_logger,"an error occurred when running update_rho kernel");
+				return;
+			}
+			this->queue_.finish();
+
+		}
 		{//run update kernel
+
 			err = kernel1->setArg(0,
 					this->tau_->GetArray().GetMemoryModel().GetBuffer());
 			if (err != CL_SUCCESS)
@@ -162,14 +181,17 @@ void ParallelACOPTVEstimator::Loop() {
 					global, local);
 
 			this->queue_.finish();
+
 		}
 
 		if (i == (nl - 1)) {
 
-			Tk0.GetArray().GetMemoryModel().Map();
-			Tk1.GetArray().GetMemoryModel().Map();
-			Lk.GetArray().GetMemoryModel().Map();
+			Tk0.GetArray().Map();
+			Tk1.GetArray().Map();
+			Lk.GetArray().Map();
 
+			//LOG4CXX_INFO(Sp::video_logger,"Lk: \n"<<Lk.ToString());
+			//walk through the Lk array to find the smallest total distance.
 			this->result_ = new HostMatrix<int, int> (2, np);
 			bestLk = INT_MAX;
 			int ibestLk;
@@ -181,8 +203,8 @@ void ParallelACOPTVEstimator::Loop() {
 				}
 			}
 			for (j = 0; j < np; j++) {
-				this->result_->Set(Tk0.Get(ibestLk * np + j), k, 0);//(rf0[i], i, 0);
-				this->result_->Set(Tk1.Get(ibestLk * np + j), k, 1);//(rf1[i], i, 1);
+				this->result_->Set(Tk0.Get(ibestLk * np + j), j, 0);//(rf0[i], i, 0);
+				this->result_->Set(Tk1.Get(ibestLk * np + j), j, 1);//(rf1[i], i, 1);
 			}
 		}
 	}
@@ -191,13 +213,84 @@ void ParallelACOPTVEstimator::Loop() {
 
 void ParallelACOPTVEstimator::Cluster() {
 	int np = this->num_particles_;
-	this->clusters0_ = new Matrix<int, int> (np, this->cluster_max_);
-	this->clusters1_ = new Matrix<int, int> (np, this->cluster_max_);
-	this->clusters01_ = new Matrix<int, int> (np, this->cluster01_max_);
+	this->clusters0_ = new DeviceMatrix<int, int> (this->cluster_max_, np);
+	this->clusters1_ = new DeviceMatrix<int, int> (this->cluster_max_, np);
+	this->clusters01_ = new DeviceMatrix<int, int> (this->cluster01_max_, np);
 
 	this->Sort(this->cf0_, this->clusters0_);
 	this->Sort(this->cf1_, this->clusters1_);
 	this->Sort(this->cf0f1_, this->clusters01_);
+
+	//DeviceMatrix<float,float> result(this->cluster01_max_,this->num_particles_);
+	delete this->cf0f1_; //reuse cf0f1;
+	this->cf0f1_ = this->RDistances();
+	//this->new_clusters01_ = new DeviceMatrix<int,int>(this->cluster01_max_,this->num_particles_);
+	//this->new_cf0f1_ = new DeviceMatrix<float,float>(this->cluster01_max_,this->num_particles_);
+
+	//this->new_cf0f1_->GetArray().UnMap();
+	//this->new_clusters01_->GetArray().UnMap();
+
+	//this->RSort(this->cf0f1_,this->clusters01_,this->new_cf0f1_,this->new_clusters01_);
+
+	//this->new_cf0f1_->GetArray().Map();
+	//this->new_clusters01_->GetArray().Map();
+
+	//LOG4CXX_INFO(Sp::video_logger,this->new_clusters01_->ToString());
+	//LOG4CXX_INFO(Sp::video_logger,this->new_cf0f1_->ToString());
+}
+
+Matrix<float, float>* ParallelACOPTVEstimator::RDistances() {
+	int err;
+	cl::Kernel* kl = DeviceManager::Instance().FindKernel(
+			"ships.video.aco_ptv.r_distances");
+	if (!kl)
+		return NULL;
+	//TODO: remmember to change this back to DeviceMatrix !!!!!
+	Matrix<float, float> *result = new DeviceMatrix<float, float> (
+			this->cluster01_max_, this->num_particles_);
+	//result->GetArray().UnMap();
+
+	err = kl->setArg(0, result->GetArray().GetMemoryModel().GetImage2D());
+	if (err != CL_SUCCESS)
+		LOG4CXX_ERROR(video_logger,"error in setting kernel arg 0: "<<err);
+	err = kl->setArg(1,
+			this->clusters0_->GetArray().GetMemoryModel().GetImage2D());
+	if (err != CL_SUCCESS)
+		LOG4CXX_ERROR(video_logger,"error in setting kernel arg 1: "<<err);
+	err = kl->setArg(2,
+			this->clusters1_->GetArray().GetMemoryModel().GetImage2D());
+	if (err != CL_SUCCESS)
+		LOG4CXX_ERROR(video_logger,"error in setting kernel arg 2: "<<err);
+	err = kl->setArg(3,
+			this->clusters01_->GetArray().GetMemoryModel().GetImage2D());
+	if (err != CL_SUCCESS)
+		LOG4CXX_ERROR(video_logger,"error in setting kernel arg 3: "<<err);
+	err = kl->setArg(4, this->f0_->GetArray().GetMemoryModel().GetBuffer());
+	if (err != CL_SUCCESS)
+		LOG4CXX_ERROR(video_logger,"error in setting kernel arg 4: "<<err);
+	err = kl->setArg(5, this->f1_->GetArray().GetMemoryModel().GetBuffer());
+	if (err != CL_SUCCESS)
+		LOG4CXX_ERROR(video_logger,"error in setting kernel arg 5: "<<err);
+	err = kl->setArg(6, this->num_particles_);
+	if (err != CL_SUCCESS)
+		LOG4CXX_ERROR(video_logger,"error in setting kernel arg 6: "<<err);
+	err = kl->setArg(7, this->cluster_size_);
+	if (err != CL_SUCCESS)
+		LOG4CXX_ERROR(video_logger,"error in setting kernel arg 7: "<<err);
+
+	cl::NDRange global(this->cluster01_max_ * this->num_blocks_,
+			this->num_threads_ / (this->cluster01_max_ * this->num_blocks_));
+	cl::NDRange local(this->cluster01_max_, this->num_threads_
+			/ (this->cluster01_max_ * this->num_blocks_));
+
+	err = queue_.enqueueNDRangeKernel(*kl, cl::NullRange, global, local);
+	this->queue_.finish();
+	if (err != CL_SUCCESS)
+		return NULL;
+
+	//LOG4CXX_INFO(Sp::video_logger,result->ToString());
+	//result->GetArray().Map();
+	return result;
 }
 
 Matrix<float, float>* ParallelACOPTVEstimator::Distances(
@@ -211,7 +304,8 @@ Matrix<float, float>* ParallelACOPTVEstimator::Distances(
 		throw InvalidKernelException();
 
 	if (result == NULL) {
-		result = new Matrix<float, float> (f0->GetHeight(), f1->GetHeight());
+		result = new DeviceMatrix<float, float> (f0->GetHeight(),
+				f1->GetHeight());
 		/*
 		 MemoryModel<float>* mm = new MemoryModel<float> (2, false, true, 1,
 		 READ_WRITE);
@@ -258,14 +352,14 @@ Matrix<float, float>* ParallelACOPTVEstimator::Distances(
 
 	if (err != CL_SUCCESS)
 		LOG4CXX_ERROR(Sp::video_logger, "error in running kernel:"<<err);
+	/*
+	 if (!f0->IsMapped())
+	 f0->GetArray().Map();
+	 if (!f1->IsMapped())
+	 f1->GetArray().Map();
 
-	if (!f0->IsMapped())
-		f0->GetArray().Map();
-	if (!f1->IsMapped())
-		f1->GetArray().Map();
-
-	result->GetArray().Map();
-
+	 result->GetArray().Map();
+	 */
 	return result;
 }
 
@@ -292,6 +386,61 @@ void ParallelACOPTVEstimator::AddFrame(Matrix<float, float>* frame)
 
 float ParallelACOPTVEstimator::RelaxationLength(const int& p0, const int& p1) {
 
+}
+
+void ParallelACOPTVEstimator::RSort(Matrix<float, float>* dis,
+		Matrix<int, int>* ids, Matrix<float, float>* new_dis,
+		Matrix<int, int>* new_ids) {
+	int err = 0;
+
+	if (dis->IsMapped())
+		dis->GetArray().UnMap();
+
+	if (ids->IsMapped())
+		ids->GetArray().UnMap();
+
+	cl::Kernel* kernel = DeviceManager::Instance().FindKernel(
+			"ships.video.aco_ptv.sort");
+
+	if (kernel == NULL)
+		throw InvalidKernelException();
+
+	err = kernel->setArg(0, dis->GetArray().GetMemoryModel().GetImage2D());
+	if (err != CL_SUCCESS)
+		LOG4CXX_ERROR(video_logger,"error in setting kernel arg 0: "<<err);
+	err = kernel->setArg(1, ids->GetArray().GetMemoryModel().GetImage2D());
+	if (err != CL_SUCCESS)
+		LOG4CXX_ERROR(video_logger,"error in setting kernel arg 1: "<<err);
+
+	err = kernel->setArg(2, new_dis->GetArray().GetMemoryModel().GetImage2D());
+	if (err != CL_SUCCESS)
+		LOG4CXX_ERROR(video_logger,"error in setting kernel arg 2: "<<err);
+
+	err = kernel->setArg(3, new_ids->GetArray().GetMemoryModel().GetImage2D());
+	if (err != CL_SUCCESS)
+		LOG4CXX_ERROR(video_logger,"error in setting kernel arg 3: "<<err);
+
+	err = kernel->setArg(4, this->cluster01_max_);
+	if (err != CL_SUCCESS)
+		LOG4CXX_ERROR(video_logger,"error in setting kernel arg 4: "<<err);
+
+	//cl::NDRange global(this->cluster01_max_*this->num_blocks_,this->num_threads_/(this->cluster01_max_ * this->num_blocks_));
+	//cl::NDRange local(this->cluster01_max_,this->num_threads_/(this->cluster01_max_ * this->num_blocks_));
+
+	err = queue_.enqueueNDRangeKernel(*kernel, cl::NullRange, cl::NDRange(
+			this->num_particles_), cl::NDRange(this->num_particles_
+			/ this->num_blocks_));
+
+	if (err != CL_SUCCESS)
+		LOG4CXX_ERROR(Sp::video_logger, "error in running kernel:"<<err);
+
+	queue_.finish();
+	/*
+	 if (!dis->IsMapped())
+	 dis->GetArray().Map();
+	 if (!indices->IsMapped())
+	 indices->GetArray().Map();
+	 */
 }
 
 void ParallelACOPTVEstimator::Sort(Matrix<float, float>* matrix, Matrix<int,
@@ -338,11 +487,35 @@ void ParallelACOPTVEstimator::Sort(Matrix<float, float>* matrix, Matrix<int,
 		LOG4CXX_ERROR(Sp::video_logger, "error in running kernel:"<<err);
 
 	queue_.finish();
-
-	if (!matrix->IsMapped())
-		matrix->GetArray().Map();
-	if (!indices->IsMapped())
-		indices->GetArray().Map();
+	/*
+	 if (!matrix->IsMapped())
+	 matrix->GetArray().Map();
+	 if (!indices->IsMapped())
+	 indices->GetArray().Map();
+	 */
 }
+template<class E, class T> void ParallelACOPTVEstimator::Init(T* container, std::string kernel_name, E value, const int& size1, const int& size2){
+	int err=0;
+	cl::Kernel* kernel = DeviceManager::Instance().FindKernel(kernel_name);
+	if(kernel==NULL)
+		return;
 
+	int num_dims = container->GetArray().GetMemoryModel().GetNumDims();
+
+	if(num_dims==2)
+		err = kernel->setArg(0,container->GetArray().GetMemoryModel().GetImage2D());
+	else if(num_dims==1)
+		err = kernel->setArg(0,container->GetArray().GetMemoryModel().GetBuffer());
+
+	err &= kernel->setArg(1, value);
+
+	err &= kernel->setArg(2, size1);
+	err &= kernel->setArg(3, size2);
+
+
+	err &= this->queue_.enqueueNDRangeKernel(*kernel,cl::NullRange,cl::NDRange(size1,this->num_threads_/size1),cl::NDRange(size1/this->num_blocks_,this->num_threads_/size1));
+
+	if(err!=CL_SUCCESS)
+		LOG4CXX_ERROR(Sp::video_logger, "an error occurred in initializing with kernel"<< kernel_name);
+}
 }

@@ -7,6 +7,7 @@ namespace Sp {
 	template Matrix<T1, T2>::Matrix(); \
 	template Matrix<T1, T2>::Matrix(Array<T2>* array, SampleModel<T1,T2>* sample_model); \
 	template Matrix<T1, T2>::Matrix(const uint32_t& width, const uint32_t& height); \
+	template Matrix<T1, T2>::Matrix(const uint32_t& width,const uint32_t& height, const uint32_t& mem_num_dims); \
 	template Matrix<T1, T2>::Matrix(const uint32_t& width,const uint32_t& height, MemoryModel<T2>* memory_model, SampleModel<T1, T2>* sample_model); \
 	template uint32_t Matrix<T1, T2>::GetWidth(); \
 	template uint32_t Matrix<T1, T2>::GetHeight(); \
@@ -103,7 +104,17 @@ template<class T1, class T2> Matrix<T1, T2>::Matrix(const uint32_t& width,
 	MemoryModel<T2>* memory_model = new MemoryModel<T2>(2,true,true, 1, READ_WRITE);
 	this->array_ = this->sample_model_->CreateArray(memory_model);
 }
-
+template<class T1, class T2> Matrix<T1, T2>::Matrix(const uint32_t& width,
+		const uint32_t& height, const uint32_t& mem_num_dims) {
+	this->width_ = width;
+	this->height_ = height;
+	uint32_t dims[2];
+	dims[0] = width;
+	dims[1] = height;
+	this->sample_model_ = new PixelInterleavedSampleModel<T1>(1, 2, dims);
+	MemoryModel<T2>* memory_model = new MemoryModel<T2>(mem_num_dims,true,true, 1, READ_WRITE);
+	this->array_ = this->sample_model_->CreateArray(memory_model);
+}
 template<class T1, class T2> Matrix<T1, T2>::Matrix(const uint32_t& width,
 		const uint32_t& height, MemoryModel<T2>* memory_model, SampleModel<T1, T2>* sample_model) {
 	this->width_ = width;
@@ -241,7 +252,7 @@ template<class T1, class T2> DeviceMatrix<T1,T2>::DeviceMatrix(const uint32_t& w
 	dims[0] = width;
 	dims[1] = height;
 	this->sample_model_ = new PixelInterleavedSampleModel<T1>(1, 2, dims);
-	MemoryModel<T2>* memory_model = new DeviceMemoryModel<T2>(2,false,false, sizeof(T2), READ_WRITE);
+	MemoryModel<T2>* memory_model = new DeviceMemoryModel<T2>(2);
 	this->array_ = this->sample_model_->CreateArray(memory_model);
 }
 /*

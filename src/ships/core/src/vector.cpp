@@ -31,7 +31,8 @@ namespace Sp {
 	template void Vector<T1, T2>::Remove(const int& index); \
 	template Vector<T1, T2> Vector<T1, T2>::Cross(const Vector<T1, T2>& vector); \
 	template Vector<T1, T2> Vector<T1, T2>::Mul(const Vector<T1, T2>& vector); \
-	template void Vector<T1, T2>::Init(T1 value);
+	template void Vector<T1, T2>::Init(T1 value); \
+	template std::string Vector<T1, T2>::ToString();
 
 #define INSTANTIATE_HOST_VECTOR(T1, T2) \
 	template void HostVector<T1, T2>::Insert(const int& pos, const T1& element); \
@@ -106,6 +107,19 @@ template<class T1, class T2> void Vector<T1, T2>::Init(T1 value){
 	for(int i=0;i<this->size_;i++){
 		this->Set(value,i);
 	}
+}
+
+template<class T1, class T2> std::string Vector<T1, T2>::ToString(){
+	std::ostringstream oss (std::ostringstream::out);
+
+	oss<<endl;
+	oss<<std::fixed;
+
+	for(int i=0;i<this->size_;i++){
+		oss<<this->Get(i)<<std::fixed<<"\t";
+	}
+	oss<<std::endl;
+	return oss.str();
 }
 
 template<class T1, class T2> void HostVector<T1, T2>::Insert(const int& pos, const T1& element){

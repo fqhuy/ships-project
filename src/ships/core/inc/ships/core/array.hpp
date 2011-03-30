@@ -274,20 +274,20 @@ public:
 
 	SHIPS_INLINE
 	DeviceArray(const uint32_t& width, const uint32_t& height, ValueType init_value=0) {
-		MemoryModel<T>* mm = new HostMemoryModel<T>(2,1);
+		MemoryModel<T>* mm = new DeviceMemoryModel<T>(2);
 		uint32_t dims[] = { width, height };
 		this->Init(2, dims, mm, true, init_value);
 	}
 
 	SHIPS_INLINE
 	DeviceArray(const uint32_t& width,const uint32_t& height,
-			MemoryModel<ValueType>* memory_model, ValueType init_value = 0): Super(width, height, memory_model, init_value){
+			MemoryModel<ValueType>* memory_model, ValueType init_value = 0):
+			Super(width, height, memory_model, init_value){
 
 	}
 	SHIPS_INLINE DeviceArray(int num_dims, uint32_t* dims, MemoryModel<
 			ValueType>* memory_model, ValueType init_value = 0) :
 		Super (num_dims, dims, memory_model, init_value) {
-		this->memory_model_->UnMap();
 	}
 private:
 	typedef Array<T> Super;

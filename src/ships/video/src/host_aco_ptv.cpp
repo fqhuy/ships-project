@@ -289,7 +289,7 @@ void HostACOPTVEstimator::Cluster() {
 
 	//LOG4CXX_INFO(Sp::video_logger,clusters0_->ToString());
 	//LOG4CXX_INFO(Sp::video_logger,clusters1_->ToString());
-	LOG4CXX_INFO(Sp::video_logger,clusters01_->ToString());
+	//LOG4CXX_INFO(Sp::video_logger,clusters01_->ToString());
 
 	//LOG4CXX_INFO(Sp::video_logger,cf0_->ToString());
 	//LOG4CXX_INFO(Sp::video_logger,cf1_->ToString());

@@ -33,9 +33,9 @@ namespace Sp {
 
 #define INSTANTIATE_DEVICE_MEMORY_MODEL(T) \
 	template class DeviceMemoryModel<T>; \
-	template T* DeviceMemoryModel<T>::CreateArray(size_t width); \
 	template T* DeviceMemoryModel<T>::Map(int32_t offset, size_t size); \
 	template T* DeviceMemoryModel<T>::Map();
+/*template T* DeviceMemoryModel<T>::CreateArray(size_t width); \*/
 	//template void DeviceMemoryModel<T>::UnMap();
 
 INSTANTIATE_MEMORY_MODEL(uint8_t);
@@ -245,6 +245,8 @@ template<class T> T*  MemoryModel<T>::CreateArray(const uint32_t& num_dims, uint
 		return NULL;
 		break;
 	}
+
+	return NULL;
 }
 
 template<class T> T* MemoryModel<T>::CreateArray(uint32_t width) {
@@ -319,6 +321,7 @@ template<class T> void MemoryModel<T>::UnMap(){
 }
 
 /* ----------------------- Device Memory Model --------------------------*/
+/*
 template<class T> T* DeviceMemoryModel<T>::CreateArray(uint32_t width){
 	this->context_ = DeviceManager::Instance().GetDefaultContext();
 
@@ -336,7 +339,7 @@ template<class T> T* DeviceMemoryModel<T>::CreateArray(uint32_t width){
 	this->memory_ = this->buffer_;
 	return this->Map(0,width);
 }
-
+*/
 template<class T> T* DeviceMemoryModel<T>::Map(int32_t offset, size_t size){
 	LOG4CXX_WARN( Sp::core_logger, "you are mapping on a device memory model. it's recommended to use mapping on MemoryModel only");
 	Super::Map(offset, size);

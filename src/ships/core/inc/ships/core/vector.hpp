@@ -55,6 +55,7 @@ public:
 	virtual SelfType Cross(const SelfType& vector);
 	virtual SelfType Mul(const SelfType& vector);
 	virtual void Init(ValueType1 value);
+	virtual std::string ToString();
 	//---------- GET ----------//
 	SHIPS_INLINE
 	virtual ValueType1 Get(const int& index){
@@ -141,10 +142,10 @@ public:
 	}
 
 	//void Set(ValueType value, const uint32_t& index);
-	void Insert(const int& pos, ConstReference1 element);
-	void Resize(const int& size, const bool& preserve = true);
-	void Remove(const int& index);
-	void Init(ValueType1 value);
+	void Insert(const int& pos, ConstReference1 element){}
+	void Resize(const int& size, const bool& preserve = true){}
+	void Remove(const int& index){}
+	void Init(ValueType1 value){}
 	//---------- GET ----------//
 	//ValueType Get(const int& index);
 	//---------- GET ----------//

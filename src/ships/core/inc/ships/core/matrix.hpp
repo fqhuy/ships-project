@@ -25,6 +25,7 @@ public:
 	 * @param height ..
 	 */
 	Matrix(const uint32_t& width, const uint32_t& height);
+	Matrix(const uint32_t& width, const uint32_t& height, const uint32_t& mem_num_dims)	;
 	/**
 	 * Matrix full constructor
 	 * @param width number of columns

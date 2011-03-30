@@ -20,7 +20,16 @@
 		<sp:program name="aco_ptv">
 			<sp:kernel name="distances" ></sp:kernel>
 			<sp:kernel name="clusters" ></sp:kernel>
-			<sp:kernel name="zeros" />
+			<sp:kernel name="one_step" />
+			<sp:kernel name="update" />
+			<sp:kernel name="r_distances" />
+			<sp:kernel name="relaxation_length" />
+			<sp:kernel name="sort" />
+			<sp:kernel name="update_rho" />
+			<sp:kernel name="init_image2di" />
+			<sp:kernel name="init_image2df" />
+			<sp:kernel name="init_bufferi" />
+			<sp:kernel name="init_bufferf" />
 			<sp:include>ships.video.aco_ptv</sp:include>
 			<sp:requirements>
 			</sp:requirements>
